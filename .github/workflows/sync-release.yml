@@ -8,9 +8,6 @@ on:
       version:
         description: 'CLI version to update'
         required: true
-      changelog:
-        description: 'Changelog entry (optional)'
-        required: false
 
 permissions:
   contents: write
@@ -38,7 +35,6 @@ jobs:
       - name: Update version in README
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # Update any version references in README
           sed -i "s/gal@[0-9]*\.[0-9]*\.[0-9]*/gal@${VERSION}/g" README.md
           sed -i "s/gal\/v[0-9]*\.[0-9]*\.[0-9]*/gal\/v${VERSION}/g" README.md
 
@@ -46,16 +42,13 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           DATE=$(date +%Y-%m-%d)
-
-          # Create new changelog entry if not exists
           if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
-            # Create temp file with new entry
             {
               head -1 CHANGELOG.md
               echo ""
               echo "## [$VERSION] - $DATE"
               echo ""
-              echo "- See [release notes](https://github.com/Scheduler-Systems/gal/releases/tag/v$VERSION) for details"
+              echo "- See release notes at https://github.com/Scheduler-Systems/gal/releases/tag/v$VERSION"
               tail -n +2 CHANGELOG.md
             } > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
           fi
@@ -81,13 +74,7 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           gh pr create \
             --title "Release v$VERSION" \
-            --body "Automated release update for v$VERSION
-
-## Changes
-- Updated version references in README
-- Added changelog entry
-
-See [full release notes](https://github.com/Scheduler-Systems/gal/releases/tag/v$VERSION) in the main repository." \
+            --body "Automated release update for v$VERSION. Updated version references in README and added changelog entry." \
             --base main \
             --head release/v$VERSION
 
@@ -104,13 +91,5 @@ See [full release notes](https://github.com/Scheduler-Systems/gal/releases/tag/v
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: v${{ steps.version.outputs.version }}
-          body: |
-            See the [full release notes](https://github.com/Scheduler-Systems/gal/releases/tag/v${{ steps.version.outputs.version }}) in the main repository.
-
-            ## Installation
-
-            ```bash
-            npm install -g @scheduler-systems/gal
-            ```
+          body: See the full release notes at https://github.com/Scheduler-Systems/gal/releases
           generate_release_notes: false
-

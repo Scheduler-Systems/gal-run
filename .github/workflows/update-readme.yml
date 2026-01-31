@@ -113,3 +113,4 @@ See [full release notes](https://github.com/Scheduler-Systems/gal/releases/tag/v
             npm install -g @scheduler-systems/gal
             ```
           generate_release_notes: false
+

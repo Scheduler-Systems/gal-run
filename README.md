@@ -1,9 +1,25 @@
-# GAL - Governance Agentic Layer
+<p align="center">
+  <img src="https://gal.run/logo.svg" alt="GAL" width="120">
+</p>
 
-Governance platform for AI coding agents. Discover, centralize, and sync approved configurations for individuals and teams.
+<h1 align="center">GAL - Governance Agentic Layer</h1>
 
-[![npm version](https://img.shields.io/npm/v/@scheduler-systems/gal.svg)](https://www.npmjs.com/package/@scheduler-systems/gal)
-[![License](https://img.shields.io/badge/license-Proprietary-blue.svg)](LICENSE)
+<p align="center">
+  <strong>Governance platform for AI coding agents. Discover, centralize, and sync approved configurations for individuals and teams.</strong>
+</p>
+
+<p align="center">
+  <a href="https://app.gal.run">Dashboard</a> •
+  <a href="https://www.npmjs.com/package/@scheduler-systems/gal">CLI</a> •
+  <a href="https://marketplace.visualstudio.com/items?itemName=scheduler-systems.gal-vscode">VS Code Extension</a>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@scheduler-systems/gal"><img src="https://img.shields.io/npm/v/@scheduler-systems/gal.svg" alt="npm version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-blue.svg" alt="License"></a>
+</p>
+
+---
 
 ## What is GAL?
 
@@ -45,14 +61,6 @@ gal auth login
 ```bash
 gal sync --pull
 ```
-
-## Components
-
-| Component | Description |
-|-----------|-------------|
-| [Dashboard](https://app.gal.run) | Web interface for managing configs and policies |
-| [CLI](https://www.npmjs.com/package/@scheduler-systems/gal) | Command-line tool for syncing configurations |
-| VS Code Extension | Editor integration (coming soon) |
 
 ## Documentation
 

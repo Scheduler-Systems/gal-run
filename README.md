@@ -75,10 +75,6 @@ Real-time sync status and notifications in your IDE.
 
 Found a security issue? See [SECURITY.md](./SECURITY.md).
 
-## License
-
-MIT - see [LICENSE](./LICENSE).
-
 ---
 
 <p align="center">

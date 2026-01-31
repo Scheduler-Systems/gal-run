@@ -1,82 +1,69 @@
-<p align="center">
-  <img src="https://gal.run/logo.svg" alt="GAL" width="120">
-</p>
+# GAL - Governance Agentic Layer
 
-<h1 align="center">GAL - Governance Agentic Layer</h1>
+Governance platform for AI coding agents. Discover, centralize, and sync approved configurations for individuals and teams.
 
-<p align="center">
-  <strong>Governance platform for AI coding agents</strong>
-</p>
+[![npm version](https://img.shields.io/npm/v/@scheduler-systems/gal.svg)](https://www.npmjs.com/package/@scheduler-systems/gal)
+[![License](https://img.shields.io/badge/license-Proprietary-blue.svg)](LICENSE)
 
-<p align="center">
-  <a href="https://app.gal.run">Dashboard</a> •
-  <a href="https://www.npmjs.com/package/@scheduler-systems/gal">CLI</a> •
-  <a href="https://marketplace.visualstudio.com/items?itemName=scheduler-systems.gal-vscode">VS Code Extension</a>
-</p>
+## What is GAL?
 
----
+GAL helps you manage AI coding agent configurations at scale:
 
-GAL helps teams manage AI coding agent configurations across their organization. Discover what agents developers are using, define approved configurations, and sync them everywhere.
+- **Auto-Discovery** - Automatically scan repositories to find existing AI agent configurations
+- **Approved Config** - Set organization-wide approved settings
+- **Config Sync** - Pull approved configs with a single command
 
-## What GAL Does
+## Supported Platforms
 
-| Feature | Description |
-|---------|-------------|
-| **Auto-Discovery** | Automatically scans repositories for AI agent configurations |
-| **Approved Config** | Define and manage organization-approved settings |
-| **Config Sync** | Developers pull approved configs with a single command |
+| Platform | Config Path | Status |
+|----------|-------------|--------|
+| Claude Code | `.claude/` | Supported |
+| Cursor | `.cursor/`, `.cursorrules` | Supported |
+| GitHub Copilot | `.github/copilot/` | Supported |
+| Windsurf | `.windsurf/` | Coming Soon |
 
-## Supported Agents
+## Quick Start
 
-| Agent | Config Files |
-|-------|--------------|
-| Claude Code | `.claude/`, `CLAUDE.md` |
-| Cursor | `.cursor/`, `.cursorrules` |
-| Windsurf | `.windsurfrules` |
-| GitHub Copilot | `.github/copilot-instructions.md` |
+### 1. Sign Up
 
-## Components
+Visit [app.gal.run](https://app.gal.run) to create your account.
 
-### Dashboard
-
-Web interface for managing configurations and viewing agent usage across your organization.
-
-**[app.gal.run](https://app.gal.run)**
-
-### CLI
-
-Command-line tool for developers to sync configurations.
+### 2. Install CLI
 
 ```bash
 npm install -g @scheduler-systems/gal
+```
+
+### 3. Authenticate
+
+```bash
 gal auth login
+```
+
+### 4. Sync Configurations
+
+```bash
 gal sync --pull
 ```
 
-### VS Code Extension
+## Components
 
-Real-time sync status and notifications in your IDE.
+| Component | Description |
+|-----------|-------------|
+| [Dashboard](https://app.gal.run) | Web interface for managing configs and policies |
+| [CLI](https://www.npmjs.com/package/@scheduler-systems/gal) | Command-line tool for syncing configurations |
+| VS Code Extension | Editor integration (coming soon) |
 
-**[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=scheduler-systems.gal-vscode)**
+## Documentation
 
-## Getting Started
-
-1. **Sign up** at [app.gal.run](https://app.gal.run)
-2. **Install the CLI**: `npm install -g @scheduler-systems/gal`
-3. **Authenticate**: `gal auth login`
-4. **Sync configs**: `gal sync --pull`
+https://gal.run/docs
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/Scheduler-Systems/gal.run/issues)
-- **Email**: support@scheduler-systems.com
+- Documentation: https://gal.run/docs
+- Email: support@scheduler-systems.com
+- Issues: https://github.com/Scheduler-Systems/gal.run/issues
 
-## Security
+## License
 
-Found a security issue? See [SECURITY.md](./SECURITY.md).
-
----
-
-<p align="center">
-  Built by <a href="https://scheduler-systems.com">Scheduler Systems</a>
-</p>
+Proprietary - Copyright (c) 2025 Scheduler Systems. All rights reserved.

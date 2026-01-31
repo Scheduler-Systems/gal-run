@@ -1,5 +1,9 @@
 # GAL Changelog
 
+## [1.0.5-test] - 2026-01-31
+
+- See release notes at https://github.com/Scheduler-Systems/gal/releases/tag/v1.0.5-test
+
 ## [1.0.0]
 
 - Initial public release

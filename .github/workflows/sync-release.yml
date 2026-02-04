@@ -27,6 +27,13 @@ jobs:
           VERSION="${{ github.event.client_payload.version || github.event.inputs.version }}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.ARC_APP_ID }}
+          private-key: ${{ secrets.ARC_PRIVATE_KEY }}
+
       - name: Create release branch
         run: |
           VERSION="${{ steps.version.outputs.version }}"
@@ -54,6 +61,8 @@ jobs:
           fi
 
       - name: Commit and push
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           git config user.name "github-actions[bot]"
@@ -61,6 +70,7 @@ jobs:
           git add README.md CHANGELOG.md
           if ! git diff --staged --quiet; then
             git commit -m "Release v$VERSION"
+            git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
             git push origin release/v$VERSION
           else
             echo "No changes to commit"
@@ -69,7 +79,7 @@ jobs:
 
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           gh pr create \
@@ -80,10 +90,11 @@ jobs:
 
       - name: Auto-merge PR
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           PR_NUMBER=$(gh pr view release/v$VERSION --json number -q .number)
+          sleep 30
           gh pr merge $PR_NUMBER --admin --squash --delete-branch
 
       - name: Create GitHub Release

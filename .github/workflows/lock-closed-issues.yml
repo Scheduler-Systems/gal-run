@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   lock:
-    runs-on: ubuntu-latest
+    runs-on: arc-linux
     steps:
       - uses: dessant/lock-threads@v5
         with:

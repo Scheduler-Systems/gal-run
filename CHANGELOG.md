@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.55] - 2026-02-17
+
+- See release notes at https://github.com/Scheduler-Systems/gal/releases/tag/v0.0.55
+
 ## [0.0.54] - 2026-02-17
 
 - See release notes at https://github.com/Scheduler-Systems/gal/releases/tag/v0.0.54

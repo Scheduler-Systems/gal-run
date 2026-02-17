@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   sync:
@@ -34,21 +33,6 @@ jobs:
           app-id: ${{ secrets.ARC_APP_ID }}
           private-key: ${{ secrets.ARC_PRIVATE_KEY }}
 
-      - name: Create release branch
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          # Clean up stale branch from previous runs
-          git push origin --delete release/v$VERSION 2>/dev/null || true
-          git branch -D release/v$VERSION 2>/dev/null || true
-          # Close any orphaned PRs from previous runs
-          EXISTING_PR=$(gh pr list --state open --head release/v$VERSION --json number --jq '.[0].number' 2>/dev/null || true)
-          if [ -n "$EXISTING_PR" ]; then
-            gh pr close "$EXISTING_PR" --comment "Superseded by new release run" --delete-branch 2>/dev/null || true
-          fi
-          git checkout -b release/v$VERSION
-
       - name: Update version in README
         run: |
           VERSION="${{ steps.version.outputs.version }}"
@@ -70,7 +54,7 @@ jobs:
             } > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
           fi
 
-      - name: Commit and push
+      - name: Commit and push to main
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
@@ -81,36 +65,21 @@ jobs:
           if ! git diff --staged --quiet; then
             git commit -m "Release v$VERSION"
             git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
-            git push origin release/v$VERSION
+            git push origin HEAD:main
           else
-            echo "No changes to commit"
-            exit 1
+            echo "No changes to commit - version already up to date"
           fi
 
-      - name: Create Pull Request
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          gh pr create \
-            --title "Release v$VERSION" \
-            --body "Automated release update for v$VERSION. Updated version references in README and added changelog entry." \
-            --base main \
-            --head release/v$VERSION
-
-      - name: Auto-merge PR
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          PR_NUMBER=$(gh pr view release/v$VERSION --json number -q .number)
-          sleep 30
-          gh pr merge $PR_NUMBER --admin --squash --delete-branch
-
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: v${{ steps.version.outputs.version }}
-          body: See the full release notes at https://github.com/Scheduler-Systems/gal/releases
-          generate_release_notes: false
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Skip if release already exists
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "Release v$VERSION already exists, skipping"
+          else
+            gh release create "v$VERSION" \
+              --title "v$VERSION" \
+              --notes "See the full release notes at https://github.com/Scheduler-Systems/gal-run-private/releases"
+          fi

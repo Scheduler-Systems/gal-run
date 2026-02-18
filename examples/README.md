@@ -6,7 +6,7 @@ This directory contains examples and guides for using GAL.
 
 ```bash
 # Install GAL
-npm install -g @scheduler-systems/gal
+npm install -g @scheduler-systems/gal-run
 
 # Authenticate
 gal auth login
@@ -15,11 +15,99 @@ gal auth login
 gal sync --pull
 ```
 
+## MCP Server Setup (Copy-Paste)
+
+Use stdio for file-based clients (recommended).
+
+**Claude Code**
+
+```bash
+cat <<'JSON' > .mcp.json
+{
+  "mcpServers": {
+    "gal": {
+      "command": "npx",
+      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
+    }
+  }
+}
+JSON
+```
+
+**Cursor**
+
+```bash
+mkdir -p .cursor
+cat <<'JSON' > .cursor/mcp.json
+{
+  "mcpServers": {
+    "gal": {
+      "command": "npx",
+      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
+    }
+  }
+}
+JSON
+```
+
+**Windsurf**
+
+```bash
+mkdir -p .windsurf
+cat <<'JSON' > .windsurf/mcp_config.json
+{
+  "mcpServers": {
+    "gal": {
+      "command": "npx",
+      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
+    }
+  }
+}
+JSON
+```
+
+**Gemini CLI**
+
+```bash
+mkdir -p .gemini
+cat <<'JSON' > .gemini/settings.json
+{
+  "mcpServers": {
+    "gal": {
+      "command": "npx",
+      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
+    }
+  }
+}
+JSON
+```
+
+**Codex (OAuth preferred)**
+
+```bash
+codex mcp add gal --url https://api.gal.run/mcp
+codex mcp login gal
+```
+
+If OAuth login fails with `Dynamic client registration not supported`, use bearer-token mode:
+
+```bash
+export GAL_AUTH_TOKEN="$(gal auth token)"
+codex mcp remove gal
+codex mcp add gal --url https://api.gal.run/mcp --bearer-token-env-var GAL_AUTH_TOKEN
+```
+
+**Troubleshooting: `Tools: (none)`**
+
+- Ensure `GAL_AUTH_TOKEN` is set in the environment that launches Codex.
+- Re-run `codex mcp add ... --bearer-token-env-var GAL_AUTH_TOKEN` after exporting the token.
+- Restart Codex after changing environment variables.
+
 ## Configuration Examples
 
-### Claude Code
+After running `gal sync --pull`, your agent configuration will be updated:
 
-After running `gal sync --pull`, your Claude Code configuration will be updated:
+**Claude Code**
 
 ```
 ~/.claude/
@@ -28,7 +116,7 @@ After running `gal sync --pull`, your Claude Code configuration will be updated:
 └── agents/            # Approved agent definitions
 ```
 
-### Cursor
+**Cursor**
 
 ```
 ~/.cursor/
@@ -36,10 +124,17 @@ After running `gal sync --pull`, your Claude Code configuration will be updated:
 └── .cursorrules       # Cursor-specific rules
 ```
 
-### Windsurf
+**Windsurf**
 
 ```
 ~/.windsurfrules       # Windsurf rules
+```
+
+**Gemini CLI**
+
+```
+~/.gemini/
+└── settings.json      # Organization-approved settings
 ```
 
 ## Organization Setup

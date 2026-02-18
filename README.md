@@ -40,7 +40,7 @@ GAL helps you manage AI coding agent configurations at scale:
 | Cursor | `.cursor/` | Supported |
 | GitHub Copilot | `.github/` | Supported |
 | Windsurf | `.windsurf/` | Supported |
-| Gemini | `.gemini/` | Supported |
+| Gemini CLI | `.gemini/` | Supported |
 | Codex | `.codex/` | Supported |
 
 ## Quick Start
@@ -71,13 +71,16 @@ This pulls your organization's approved configs and sets up MCP for all supporte
 
 ## MCP Server
 
-GAL provides an MCP server that gives AI coding agents access to the governance API. Use the **stdio transport** (recommended) or the hosted HTTP endpoint.
+GAL provides an MCP server that gives AI coding agents access to the governance API. Use stdio for file-based clients (recommended) and hosted HTTP for Codex or environments without stdio.
 
-### Setup
+### Copy-Paste Setup (stdio)
 
-Add the GAL MCP server to your project. The configuration is the same across all platforms:
+Pick your agent and paste the snippet.
 
-```json
+**Claude Code**
+
+```bash
+cat <<'JSON' > .mcp.json
 {
   "mcpServers": {
     "gal": {
@@ -86,17 +89,81 @@ Add the GAL MCP server to your project. The configuration is the same across all
     }
   }
 }
+JSON
 ```
 
-| Platform | Config File |
-|----------|-------------|
-| Claude Code | `.mcp.json` |
-| Cursor | `.cursor/mcp.json` |
-| Windsurf | `.windsurf/mcp_config.json` |
-| Gemini | `.gemini/settings.json` |
-| Codex | Use `codex mcp add ...` (global Codex config) |
+**Cursor**
 
-> **Tip:** `gal sync --pull` auto-configures MCP for all platforms.
+```bash
+mkdir -p .cursor
+cat <<'JSON' > .cursor/mcp.json
+{
+  "mcpServers": {
+    "gal": {
+      "command": "npx",
+      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
+    }
+  }
+}
+JSON
+```
+
+**Windsurf**
+
+```bash
+mkdir -p .windsurf
+cat <<'JSON' > .windsurf/mcp_config.json
+{
+  "mcpServers": {
+    "gal": {
+      "command": "npx",
+      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
+    }
+  }
+}
+JSON
+```
+
+**Gemini CLI**
+
+```bash
+mkdir -p .gemini
+cat <<'JSON' > .gemini/settings.json
+{
+  "mcpServers": {
+    "gal": {
+      "command": "npx",
+      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
+    }
+  }
+}
+JSON
+```
+
+> **Tip:** `gal sync --pull` auto-configures MCP for all supported platforms.
+
+### Codex Setup (Hosted HTTP)
+
+**OAuth (preferred)**
+
+```bash
+codex mcp add gal --url https://api.gal.run/mcp
+codex mcp login gal
+```
+
+If OAuth login fails with `Dynamic client registration not supported`, use bearer-token mode:
+
+```bash
+export GAL_AUTH_TOKEN="$(gal auth token)"
+codex mcp remove gal
+codex mcp add gal --url https://api.gal.run/mcp --bearer-token-env-var GAL_AUTH_TOKEN
+```
+
+**Troubleshooting: `Tools: (none)`**
+
+- Ensure `GAL_AUTH_TOKEN` is set in the environment that launches Codex.
+- Re-run `codex mcp add ... --bearer-token-env-var GAL_AUTH_TOKEN` after exporting the token.
+- Restart Codex after changing environment variables.
 
 ### Hosted HTTP (alternative)
 
@@ -114,25 +181,6 @@ For environments where stdio is not available, use the hosted endpoint:
 ```
 
 Authenticate with `Authorization: Bearer <token>` header. Get your token with `gal auth token`.
-
-### Codex Setup
-
-Preferred (OAuth):
-
-```bash
-codex mcp add gal --url https://api.gal.run/mcp
-codex mcp login gal
-```
-
-If OAuth login fails with `Dynamic client registration not supported`, use bearer-token mode:
-
-```bash
-export GAL_AUTH_TOKEN="$(gal auth token)"
-codex mcp remove gal
-codex mcp add gal --url https://api.gal.run/mcp --bearer-token-env-var GAL_AUTH_TOKEN
-```
-
-If `/mcp` shows `Tools: (none)`, verify `GAL_AUTH_TOKEN` is available in the Codex process environment, then restart Codex.
 
 ### Available Tools
 

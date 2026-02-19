@@ -1,173 +1,23 @@
 <p align="center">
-  <img src="https://gal.run/logo.svg" alt="GAL" width="120">
-</p>
-
-<h1 align="center">GAL - Governance Agentic Layer</h1>
-
-<p align="center">
-  <strong>Governance platform for AI coding agents. Discover, centralize, and sync approved configurations across your organization.</strong>
+  <img src="hero-banner.png" alt="GAL - Governance Agentic Layer" width="700">
 </p>
 
 <p align="center">
-  <a href="https://app.gal.run">Dashboard</a> &bull;
-  <a href="https://www.npmjs.com/package/@scheduler-systems/gal-run">CLI</a> &bull;
-  <a href="https://marketplace.visualstudio.com/items?itemName=scheduler-systems.gal-vscode">VS Code Extension</a> &bull;
-  <a href="#mcp-server">MCP Server</a> &bull;
-  <a href="CHANGELOG.md">Changelog</a>
+  <a href="https://github.com/Scheduler-Systems/gal-run/issues"><img src="https://img.shields.io/github/issues/Scheduler-Systems/gal-run" alt="GitHub issues"></a>
+  <a href="https://gal.run"><img src="https://img.shields.io/badge/docs-gal.run-blue" alt="Documentation"></a>
 </p>
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/@scheduler-systems/gal-run"><img src="https://img.shields.io/npm/v/@scheduler-systems/gal-run.svg" alt="npm version"></a>
-  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-Proprietary-blue.svg" alt="License"></a>
-</p>
+# GAL - Governance Agentic Layer
 
----
+The easiest way to govern your AI coding agents.
 
-## What is GAL?
+GAL provides centralized configuration management and governance for AI coding agents (Claude Code, Cursor, Windsurf, GitHub Copilot, and more) without disrupting your developers or requiring an architecture overhaul.
 
-GAL helps you manage AI coding agent configurations at scale:
-
-- **Auto-Discovery** - Scan repositories to find existing AI agent configurations
-- **Approved Config** - Set organization-wide approved settings for all platforms
-- **Config Sync** - Pull approved configs with a single command
-- **MCP Server** - Full governance API access via Model Context Protocol
-
-## Supported Platforms
-
-| Platform | Config Path | Status |
-|----------|-------------|--------|
-| Claude Code | `.claude/` | Supported |
-| Cursor | `.cursor/` | Supported |
-| GitHub Copilot | `.github/` | Supported |
-| Windsurf | `.windsurf/` | Supported |
-| Gemini CLI | `.gemini/` | Supported |
-| Codex | `.codex/` | Supported |
-
-## Quick Start
-
-### 1. Sign Up
-
-Visit [app.gal.run](https://app.gal.run) to create your account.
-
-### 2. Install CLI
-
-```bash
-npm install -g @scheduler-systems/gal-run
-```
-
-### 3. Authenticate
-
-```bash
-gal auth login
-```
-
-### 4. Sync Configurations
-
-```bash
-gal sync --pull
-```
-
-This pulls your organization's approved configs and sets up MCP for all supported platforms automatically.
+**[Get started free at app.gal.run](https://app.gal.run)**
 
 ## MCP Server
 
-GAL provides an MCP server that gives AI coding agents access to the governance API. Use stdio for file-based clients (recommended) and hosted HTTP for Codex or environments without stdio.
-
-### Copy-Paste Setup (stdio)
-
-Pick your agent and paste the snippet.
-
-**Claude Code**
-
-```bash
-cat <<'JSON' > .mcp.json
-{
-  "mcpServers": {
-    "gal": {
-      "command": "npx",
-      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
-    }
-  }
-}
-JSON
-```
-
-**Cursor**
-
-```bash
-mkdir -p .cursor
-cat <<'JSON' > .cursor/mcp.json
-{
-  "mcpServers": {
-    "gal": {
-      "command": "npx",
-      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
-    }
-  }
-}
-JSON
-```
-
-**Windsurf**
-
-```bash
-mkdir -p .windsurf
-cat <<'JSON' > .windsurf/mcp_config.json
-{
-  "mcpServers": {
-    "gal": {
-      "command": "npx",
-      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
-    }
-  }
-}
-JSON
-```
-
-**Gemini CLI**
-
-```bash
-mkdir -p .gemini
-cat <<'JSON' > .gemini/settings.json
-{
-  "mcpServers": {
-    "gal": {
-      "command": "npx",
-      "args": ["-y", "@scheduler-systems/gal-mcp-session"]
-    }
-  }
-}
-JSON
-```
-
-> **Tip:** `gal sync --pull` auto-configures MCP for all supported platforms.
-
-### Codex Setup (Hosted HTTP)
-
-**OAuth (preferred)**
-
-```bash
-codex mcp add gal --url https://api.gal.run/mcp
-codex mcp login gal
-```
-
-If OAuth login fails with `Dynamic client registration not supported`, use bearer-token mode:
-
-```bash
-export GAL_AUTH_TOKEN="$(gal auth token)"
-codex mcp remove gal
-codex mcp add gal --url https://api.gal.run/mcp --bearer-token-env-var GAL_AUTH_TOKEN
-```
-
-**Troubleshooting: `Tools: (none)`**
-
-- Ensure `GAL_AUTH_TOKEN` is set in the environment that launches Codex.
-- Re-run `codex mcp add ... --bearer-token-env-var GAL_AUTH_TOKEN` after exporting the token.
-- Restart Codex after changing environment variables.
-
-### Hosted HTTP (alternative)
-
-For environments where stdio is not available, use the hosted endpoint:
+GAL exposes an MCP server so your AI coding agent can access governance tools directly. Connect your agent to `https://api.gal.run/mcp`:
 
 ```json
 {
@@ -180,37 +30,202 @@ For environments where stdio is not available, use the hosted endpoint:
 }
 ```
 
-Authenticate with `Authorization: Bearer <token>` header. Get your token with `gal auth token`.
+Authentication is handled automatically via OAuth — your MCP client will be redirected to sign in on first use.
 
-### Available Tools
+### MCP Client configuration
 
-| Category | Tools | Description |
-|----------|-------|-------------|
-| Organizations | 4 | List orgs, sync, discover configs |
-| Approved Config | 2 | Get/set org-wide approved config |
-| Config Governance | 8 | Proposals, versions, tracked repos |
-| Team Management | 3 | List members, set roles, sync |
-| Compliance | 3 | Scan compliance, get results, SDLC status |
+<details>
+  <summary>Amp</summary>
 
-## CLI Commands
+Follow the <a href="https://ampcode.com/manual#mcp">Amp MCP guide</a> and use the config provided above.
 
-| Command | Description |
-|---------|-------------|
-| `gal auth login` | Authenticate with GitHub |
-| `gal auth token` | Print your GAL token |
-| `gal sync --pull` | Pull approved configurations |
-| `gal sync --status` | Check sync status |
-| `gal discover` | Scan org repos for AI agent configs |
+</details>
+
+<details>
+  <summary>Claude Code</summary>
+
+Add to `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "gal": {
+      "type": "streamable-http",
+      "url": "https://api.gal.run/mcp"
+    }
+  }
+}
+```
+
+Or via CLI:
+
+```bash
+claude mcp add gal --type streamable-http https://api.gal.run/mcp
+```
+
+</details>
+
+<details>
+  <summary>Cline</summary>
+
+Follow the <a href="https://docs.cline.bot/mcp/configuring-mcp-servers">Cline MCP guide</a> and use the config provided above.
+
+</details>
+
+<details>
+  <summary>Codex</summary>
+
+Follow the <a href="https://developers.openai.com/codex/mcp/#configure-with-the-cli">Codex MCP guide</a> and use the config provided above.
+
+</details>
+
+<details>
+  <summary>Copilot CLI</summary>
+
+Start Copilot CLI and run `/mcp add`, then configure:
+
+- **Server name:** `gal`
+- **Server Type:** `Remote (streamable-http)`
+- **URL:** `https://api.gal.run/mcp`
+
+</details>
+
+<details>
+  <summary>Copilot / VS Code</summary>
+
+Add to your VS Code MCP settings (`.vscode/mcp.json`):
+
+```json
+{
+  "servers": {
+    "gal": {
+      "type": "streamable-http",
+      "url": "https://api.gal.run/mcp"
+    }
+  }
+}
+```
+
+Or follow the <a href="https://code.visualstudio.com/docs/copilot/chat/mcp-servers#_add-an-mcp-server">VS Code MCP guide</a>.
+
+</details>
+
+<details>
+  <summary>Cursor</summary>
+
+Go to `Cursor Settings` > `MCP` > `Add new MCP server`. Use the config provided above.
+
+</details>
+
+<details>
+  <summary>Gemini CLI</summary>
+
+Follow the <a href="https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md">Gemini CLI MCP guide</a> and use the config provided above.
+
+</details>
+
+<details>
+  <summary>Gemini Code Assist</summary>
+
+Follow the <a href="https://cloud.google.com/gemini/docs/codeassist/use-agentic-chat-pair-programmer#configure-mcp-servers">Gemini Code Assist MCP guide</a> and use the config provided above.
+
+</details>
+
+<details>
+  <summary>JetBrains AI Assistant & Junie</summary>
+
+Go to `Settings | Tools | AI Assistant | Model Context Protocol (MCP)` > `Add`. Use the config provided above.
+
+For Junie: `Settings | Tools | Junie | MCP Settings` > `Add`.
+
+</details>
+
+<details>
+  <summary>Kiro</summary>
+
+Open the IDE Activity Bar or go to `Settings` > `MCP Servers`. Use the config provided above.
+
+</details>
+
+<details>
+  <summary>Warp</summary>
+
+Go to `Settings | AI | Manage MCP Servers` > `+ Add`. Follow the <a href="https://docs.warp.dev/knowledge-and-collaboration/mcp#adding-an-mcp-server">Warp MCP guide</a> and use the config provided above.
+
+</details>
+
+<details>
+  <summary>Windsurf</summary>
+
+Follow the <a href="https://docs.windsurf.com/windsurf/cascade/mcp#mcp-config-json">Windsurf MCP guide</a> and use the config provided above.
+
+</details>
+
+## CLI
+
+Install the GAL CLI for config sync and policy checking:
+
+```bash
+npm login --registry https://npm.pkg.github.com
+
+npm install -g @scheduler-systems/gal-run --registry https://npm.pkg.github.com
+```
+
+```bash
+# Authenticate with GitHub
+gal auth login
+
+# Pull approved configs to your local machine
+gal sync --pull
+
+# Check for policy violations before committing
+gal check
+```
+
+## Features
+
+- **MCP Server**: Connect any AI coding agent to your org's governance policies
+- **Auto-Discovery**: Automatically find every AI agent configuration across your repositories
+- **Centralized Management**: One dashboard to manage configs for Claude Code, Cursor, Windsurf, and more
+- **Policy Enforcement**: Define and enforce organization-wide standards
+- **CLI Sync**: Keep local configs in sync with approved team standards
+- **GitHub Integration**: Native GitHub App for seamless repository scanning
+
+## Supported Agents
+
+| Agent | Config Files | Status |
+|-------|-------------|--------|
+| Claude Code | `.claude/`, `CLAUDE.md` | Supported |
+| Cursor | `.cursor/`, `.cursorrules` | Supported |
+| Windsurf | `.windsurfrules` | Supported |
+| GitHub Copilot | `.github/copilot-instructions.md` | Supported |
+| Aider | `.aider*` | Supported |
+| Cline | `.clinerules`, `.cline/` | Supported |
+| Amazon Q | `.amazonq/` | Coming Soon |
 
 ## Documentation
 
-[gal.run/docs](https://gal.run/docs)
+Full documentation at [docs.gal.run](https://docs.gal.run)
+
+## Dashboard
+
+Access your organization's dashboard at [app.gal.run](https://app.gal.run)
 
 ## Support
 
-- Email: support@scheduler-systems.com
-- Issues: [github.com/Scheduler-Systems/gal-run/issues](https://github.com/Scheduler-Systems/gal-run/issues)
+- **Issues**: Use this repository for bug reports and feature requests
+- **Discussions**: Community support and questions
+- **Email**: contact@gal.run
+- **Enterprise**: For enterprise inquiries, contact sales@scheduler-systems.com
+
+## About
+
+GAL is built by [Scheduler Systems](https://scheduler-systems.com), a company focused on developer tooling and AI governance.
 
 ## License
 
-Proprietary - Copyright (c) 2026 Scheduler Systems. All rights reserved.
+GAL is proprietary software. See [LICENSE](LICENSE) for details.
+
+---
+
+**Note**: This repository is for documentation, issues, and community engagement. The GAL source code is not open source.

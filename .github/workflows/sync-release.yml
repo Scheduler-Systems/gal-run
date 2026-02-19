@@ -50,7 +50,7 @@ jobs:
               echo ""
               echo "## [$VERSION] - $DATE"
               echo ""
-              echo "- See release notes at https://github.com/Scheduler-Systems/gal/releases/tag/v$VERSION"
+              echo "- See [npm package](https://www.npmjs.com/package/@scheduler-systems/gal-run/v/$VERSION) for details"
               tail -n +2 CHANGELOG.md
             } > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
           fi
@@ -96,5 +96,7 @@ jobs:
           else
             gh release create "v$VERSION" \
               --title "v$VERSION" \
-              --notes "See the full release notes at https://github.com/Scheduler-Systems/gal-run-private/releases"
+              --notes "Install or update: \`npm install -g @scheduler-systems/gal-run\`
+
+          See [npm package](https://www.npmjs.com/package/@scheduler-systems/gal-run/v/$VERSION) for details."
           fi

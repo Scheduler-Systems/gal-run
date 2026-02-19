@@ -10,7 +10,6 @@ jobs:
     steps:
       - run: echo "Ready to merge"
 
-  runner-policy:
-    uses: scheduler-systems/infra/.github/workflows/runner-policy-check.yml@main
-    permissions:
-      contents: read
+  # runner-policy check is not available for public repos
+  # (scheduler-systems/infra is a private repo)
+  # The policy is enforced on the private repo (gal-run-private) instead.

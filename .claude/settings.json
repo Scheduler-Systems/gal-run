@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(pwd)",
+      "Bash(which:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(git ls-files:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh pr view:*)",
+      "Write",
+      "Edit"
+    ],
+    "deny": [
+      "Bash(gcloud secrets versions access:*)",
+      "Bash(gcloud billing:*)",
+      "Bash(gcloud organizations set-iam-policy:*)",
+      "Bash(gcloud organizations add-iam-policy-binding:*)",
+      "Bash(gcloud organizations remove-iam-policy-binding:*)",
+      "Bash(gcloud projects delete:*)",
+      "Bash(gcloud iam service-accounts keys create:*)",
+      "Bash(terraform destroy:*)",
+      "Bash(terraform apply:*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Edit(./.env)",
+      "Edit(./.env.*)",
+      "Write(./.env)",
+      "Write(./.env.*)"
+    ]
+  },
+  "enabledMcpjsonServers": []
+}

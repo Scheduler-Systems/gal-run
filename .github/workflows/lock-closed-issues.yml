@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   lock:
-    runs-on: arc-linux
+    runs-on: ci-standard-runc-x64
     steps:
       - uses: dessant/lock-threads@v5
         with:

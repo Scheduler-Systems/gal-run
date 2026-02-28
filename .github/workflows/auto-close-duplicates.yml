@@ -10,7 +10,7 @@ permissions:
 jobs:
   close-duplicate:
     if: github.event.label.name == 'duplicate'
-    runs-on: arc-linux
+    runs-on: ci-standard-runc-x64
     steps:
       - uses: actions/github-script@v7
         with:

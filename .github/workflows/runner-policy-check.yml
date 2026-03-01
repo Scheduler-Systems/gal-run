@@ -53,11 +53,11 @@ jobs:
               - docker-dind-x64
               - bare-high-arm64
           dynamic_patterns:
-            - "${{ inputs.runs-on }}"
-            - "${{ inputs.runner_label }}"
-            - "${{ matrix.os }}"
-            - "${{ matrix.runner }}"
-            - "${{ matrix.runs_on || matrix.runner }}"
+            - ${{ '"${{ inputs.runs-on }}"' }}
+            - ${{ '"${{ inputs.runner_label }}"' }}
+            - ${{ '"${{ matrix.os }}"' }}
+            - ${{ '"${{ matrix.runner }}"' }}
+            - ${{ '"${{ matrix.runs_on || matrix.runner }}"' }}
           POLICY_EOF
 
       - name: Validate workflow runners

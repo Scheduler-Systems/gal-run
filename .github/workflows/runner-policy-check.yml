@@ -1,0 +1,246 @@
+name: Runner Policy Check
+
+# Reusable workflow called from Gate in every repo.
+# Validates that all workflow files use approved runners.
+#
+# Canonical policy: github/runner-policy.yml
+# When updating the policy file, update the RUNNER_POLICY heredoc below too.
+
+on:
+  workflow_call:
+
+jobs:
+  check-runners:
+    runs-on: ci-standard-runc-x64
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+
+      - name: Write runner policy
+        run: |
+          cat > /tmp/runner-policy.yml << 'POLICY_EOF'
+          default_allowed:
+            - arc-linux
+            - arc-linux-agents
+            - arc-linux-docker
+            - arc-linux-docker-amd64
+            - arc-linux-runc
+            - arc-linux-kata
+            - arc-linux-kata-fc
+            - arc-linux-agents-runc
+            - ci-standard-gvisor-x64
+            - ci-standard-runc-x64
+            - ci-medium-gvisor-x64
+            - ci-medium-runc-x64
+            - ci-high-gvisor-x64
+            - ci-high-runc-x64
+            - agents-standard-runc-x64
+            - agents-standard-kata-x64
+            - agents-medium-runc-x64
+            - agents-medium-kata-x64
+            - agents-high-runc-x64
+            - docker-standard-dind-x64
+            - docker-medium-dind-x64
+            - docker-high-dind-x64
+            - docker-dind-x64
+            - macos-ci
+          exceptions:
+            Scheduler:
+              - macos-ci
+              - macos-ios-runners
+            infra:
+              - macos-host
+              - docker-dind-x64
+              - bare-high-arm64
+          dynamic_patterns:
+            - "${{ inputs.runs-on }}"
+            - "${{ inputs.runner_label }}"
+            - "${{ matrix.os }}"
+            - "${{ matrix.runner }}"
+            - "${{ matrix.runs_on || matrix.runner }}"
+          POLICY_EOF
+
+      - name: Validate workflow runners
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          POLICY="/tmp/runner-policy.yml"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          VIOLATIONS=()
+
+          # Parse default allowed runners from policy
+          DEFAULT_ALLOWED=()
+          in_default=false
+          while IFS= read -r line; do
+            line="${line%$'\r'}"  # strip trailing \r
+            if [[ "$line" =~ default_allowed: ]]; then
+              in_default=true
+              continue
+            fi
+            if $in_default; then
+              if [[ "$line" =~ ^[[:space:]]*-[[:space:]] ]]; then
+                runner=$(echo "$line" | sed 's/^[[:space:]]*- //' | sed 's/[[:space:]]*#.*//' | tr -d '"')
+                DEFAULT_ALLOWED+=("$runner")
+              elif [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "$line" ]]; then
+                continue  # skip comments and blank lines
+              else
+                break
+              fi
+            fi
+          done < "$POLICY"
+
+          # Parse repo-specific exceptions
+          REPO_EXCEPTIONS=()
+          in_exceptions=false
+          in_repo=false
+          while IFS= read -r line; do
+            line="${line%$'\r'}"  # strip trailing \r
+            if [[ "$line" =~ exceptions: ]]; then
+              in_exceptions=true
+              continue
+            fi
+            if $in_exceptions; then
+              # Skip comments and blank lines
+              trimmed=$(echo "$line" | sed 's/^[[:space:]]*//')
+              if [[ -z "$trimmed" ]] || [[ "$trimmed" == "#"* ]]; then
+                continue
+              fi
+              # New top-level key ends exceptions block
+              if [[ ! "$line" =~ ^[[:space:]] ]]; then
+                break
+              fi
+              # Check for repo name match (indented key ending with colon)
+              if [[ "$trimmed" == "${REPO_NAME}:" ]]; then
+                in_repo=true
+                continue
+              elif [[ "$trimmed" =~ ^[A-Za-z].*:$ ]] && $in_repo; then
+                in_repo=false
+                continue
+              fi
+              if $in_repo && [[ "$line" =~ ^[[:space:]]*-[[:space:]] ]]; then
+                runner=$(echo "$line" | sed 's/^[[:space:]]*- //' | sed 's/[[:space:]]*#.*//' | tr -d '"')
+                REPO_EXCEPTIONS+=("$runner")
+              fi
+            fi
+          done < "$POLICY"
+
+          # Parse dynamic patterns
+          DYNAMIC_PATTERNS=()
+          in_dynamic=false
+          while IFS= read -r line; do
+            line="${line%$'\r'}"  # strip trailing \r
+            if [[ "$line" =~ dynamic_patterns: ]]; then
+              in_dynamic=true
+              continue
+            fi
+            if $in_dynamic; then
+              if [[ "$line" =~ ^[[:space:]]*-[[:space:]] ]]; then
+                pattern=$(echo "$line" | sed 's/^[[:space:]]*- //' | sed 's/[[:space:]]*#.*//' | tr -d '"')
+                # Skip empty patterns (from unexpanded ${{ }} expressions)
+                if [[ -n "$pattern" ]]; then
+                  DYNAMIC_PATTERNS+=("$pattern")
+                fi
+              elif [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "$line" ]]; then
+                continue  # skip comments and blank lines
+              else
+                break
+              fi
+            fi
+          done < "$POLICY"
+
+          # Combine allowed runners
+          ALL_ALLOWED=("${DEFAULT_ALLOWED[@]}" "${REPO_EXCEPTIONS[@]}")
+
+          echo "=== Runner Policy Check ==="
+          echo "Repository: $REPO_NAME"
+          echo "Default allowed: ${DEFAULT_ALLOWED[*]}"
+          if [ ${#REPO_EXCEPTIONS[@]} -gt 0 ]; then
+            echo "Repo exceptions: ${REPO_EXCEPTIONS[*]}"
+          fi
+          echo ""
+
+          is_allowed() {
+            local runner="$1"
+
+            # Allow all template expressions — they resolve at runtime
+            # and cannot be validated statically
+            if [[ "$runner" == *'${'* ]]; then
+              return 0
+            fi
+
+            # Check against allowed list
+            for allowed in "${ALL_ALLOWED[@]}"; do
+              if [[ "$runner" == "$allowed" ]]; then
+                return 0
+              fi
+            done
+
+            return 1
+          }
+
+          # Scan all workflow files
+          if [ ! -d .github/workflows ]; then
+            echo "No .github/workflows directory found. Skipping."
+            exit 0
+          fi
+
+          for workflow in .github/workflows/*.yml .github/workflows/*.yaml; do
+            [ -f "$workflow" ] || continue
+
+            filename=$(basename "$workflow")
+
+            # Skip self (contains runs-on in script text)
+            if [[ "$filename" == "runner-policy-check.yml" ]]; then
+              continue
+            fi
+
+            # Extract runs-on values
+            while IFS= read -r line; do
+              # Skip comment lines
+              trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//')
+              if [[ "$trimmed_line" == "#"* ]]; then
+                continue
+              fi
+              if [[ "$line" =~ runs-on: ]]; then
+                runner=$(echo "$line" | sed 's/.*runs-on:[[:space:]]*//' | tr -d "'\"")
+
+                # Skip empty or array-start lines
+                if [[ "$runner" == "[" ]] || [[ -z "$runner" ]]; then
+                  continue
+                fi
+
+                # Handle inline array: [self-hosted, macOS]
+                if [[ "$runner" == "["*"]" ]]; then
+                  runner=$(echo "$runner" | tr -d '[]' | xargs)
+                  runner="[$runner]"
+                fi
+
+                if ! is_allowed "$runner"; then
+                  VIOLATIONS+=("$filename: $runner")
+                fi
+              fi
+            done < "$workflow"
+          done
+
+          # Report results
+          if [ ${#VIOLATIONS[@]} -gt 0 ]; then
+            echo "::error::Runner policy violations found!"
+            echo ""
+            echo "The following workflows use runners not allowed by org policy:"
+            echo ""
+            for v in "${VIOLATIONS[@]}"; do
+              echo "  - $v"
+            done
+            echo ""
+            echo "Allowed runners for '$REPO_NAME':"
+            for a in "${ALL_ALLOWED[@]}"; do
+              echo "  - $a"
+            done
+            echo ""
+            echo "To add an exception, update: https://github.com/scheduler-systems/infra/blob/main/github/runner-policy.yml"
+            echo "Then update the embedded policy in: .github/workflows/runner-policy-check.yml"
+            exit 1
+          else
+            echo "All workflows comply with runner policy."
+          fi

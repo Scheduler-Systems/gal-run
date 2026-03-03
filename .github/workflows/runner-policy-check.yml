@@ -52,12 +52,6 @@ jobs:
               - macos-host
               - docker-dind-x64
               - bare-high-arm64
-          dynamic_patterns:
-            - ${{ '"${{ inputs.runs-on }}"' }}
-            - ${{ '"${{ inputs.runner_label }}"' }}
-            - ${{ '"${{ matrix.os }}"' }}
-            - ${{ '"${{ matrix.runner }}"' }}
-            - ${{ '"${{ matrix.runs_on || matrix.runner }}"' }}
           POLICY_EOF
 
       - name: Validate workflow runners
@@ -125,31 +119,9 @@ jobs:
             fi
           done < "$POLICY"
 
-          # Parse dynamic patterns
-          DYNAMIC_PATTERNS=()
-          in_dynamic=false
-          while IFS= read -r line; do
-            line="${line%$'\r'}"  # strip trailing \r
-            if [[ "$line" =~ dynamic_patterns: ]]; then
-              in_dynamic=true
-              continue
-            fi
-            if $in_dynamic; then
-              if [[ "$line" =~ ^[[:space:]]*-[[:space:]] ]]; then
-                pattern=$(echo "$line" | sed 's/^[[:space:]]*- //' | sed 's/[[:space:]]*#.*//' | tr -d '"')
-                # Skip empty patterns (from unexpanded ${{ }} expressions)
-                if [[ -n "$pattern" ]]; then
-                  DYNAMIC_PATTERNS+=("$pattern")
-                fi
-              elif [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "$line" ]]; then
-                continue  # skip comments and blank lines
-              else
-                break
-              fi
-            fi
-          done < "$POLICY"
-
           # Combine allowed runners
+          # Note: Template expressions like ${{ inputs.runs-on }} are handled
+          # generically by is_allowed() which allows any runner containing '${'
           ALL_ALLOWED=("${DEFAULT_ALLOWED[@]}" "${REPO_EXCEPTIONS[@]}")
 
           echo "=== Runner Policy Check ==="

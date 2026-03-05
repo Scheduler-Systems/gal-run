@@ -11,7 +11,7 @@ on:
 
 jobs:
   check-runners:
-    runs-on: ci-standard-runc-x64
+    runs-on: ci-standard-runc
     steps:
       - name: Checkout PR code
         uses: actions/checkout@v4

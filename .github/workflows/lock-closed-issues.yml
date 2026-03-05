@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   lock:
-    runs-on: ci-standard-runc-x64
+    runs-on: ci-standard-runc
     steps:
       - uses: dessant/lock-threads@v5
         with:

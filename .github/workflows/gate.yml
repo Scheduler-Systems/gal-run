@@ -8,7 +8,7 @@ jobs:
   gate:
     runs-on: ci-standard-runc
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Public surface check
         shell: bash

@@ -166,6 +166,13 @@ Follow the <a href="https://docs.windsurf.com/windsurf/cascade/mcp#mcp-config-js
 Install the GAL CLI for config sync and policy checking:
 
 ```bash
+brew tap scheduler-systems/gal-run https://github.com/Scheduler-Systems/gal-run.git
+brew install gal
+```
+
+Or install from npm:
+
+```bash
 npm install -g @scheduler-systems/gal-run
 ```
 

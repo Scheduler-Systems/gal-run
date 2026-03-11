@@ -27,7 +27,7 @@ fi
 
 # Install via npm
 echo "Installing GAL CLI..."
-npm install -g @anthropic-ai/gal
+npm install -g @scheduler-systems/gal-run
 
 # Verify installation
 if command -v gal &> /dev/null; then
@@ -41,6 +41,6 @@ if command -v gal &> /dev/null; then
     echo "  gal sync --pull   # Sync approved config"
     echo ""
 else
-    echo -e "${RED}Installation failed. Please try: npm install -g @anthropic-ai/gal${RESET}"
+    echo -e "${RED}Installation failed. Please try: npm install -g @scheduler-systems/gal-run${RESET}"
     exit 1
 fi

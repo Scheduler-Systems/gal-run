@@ -22,7 +22,7 @@ try {
 
 # Install via npm
 Write-Host "Installing GAL CLI..."
-npm install -g @anthropic-ai/gal
+npm install -g @scheduler-systems/gal-run
 
 # Verify installation
 try {

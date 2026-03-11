@@ -48,6 +48,88 @@ jobs:
             } > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
           fi
 
+      - name: Update Homebrew Formula
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          HOMEBREW_PAYLOAD: ${{ toJson(github.event.client_payload.homebrew) }}
+        run: |
+          if [ -z "$HOMEBREW_PAYLOAD" ] || [ "$HOMEBREW_PAYLOAD" = "null" ]; then
+            echo "No Homebrew payload supplied; skipping Formula update"
+            exit 0
+          fi
+
+          python3 <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = json.loads(os.environ["HOMEBREW_PAYLOAD"])
+          assets = payload["assets"]
+          base_url = f"https://github.com/Scheduler-Systems/gal-run/releases/download/v{os.environ['VERSION']}"
+
+          def tarball_sha(asset_key):
+            asset = assets.get(asset_key) or {}
+            tarball = asset.get("tarball") or {}
+            value = tarball.get("sha256")
+            if not value:
+              raise SystemExit(f"Missing Homebrew tarball sha256 for {asset_key}")
+            return value
+
+          formula = f"""class Gal < Formula
+            desc \"Governance Agentic Layer CLI\"
+            homepage \"https://gal.run\"
+            version \"{os.environ['VERSION']}\"
+
+            livecheck do
+              url :stable
+              strategy :github_latest
+            end
+
+            on_macos do
+              on_arm do
+                url \"{base_url}/gal-#{{version}}-darwin-arm64.tar.gz\"
+                sha256 \"{tarball_sha('darwinArm64')}\"
+              end
+
+              on_intel do
+                url \"{base_url}/gal-#{{version}}-darwin-x64.tar.gz\"
+                sha256 \"{tarball_sha('darwinX64')}\"
+              end
+            end
+
+            on_linux do
+              on_intel do
+                url \"{base_url}/gal-#{{version}}-linux-x64.tar.gz\"
+                sha256 \"{tarball_sha('linuxX64')}\"
+              end
+            end
+
+            def install
+              libexec.install \"gal\" => \"gal-real\"
+              bin.mkpath
+              bin.install_symlink(var/\"gal\"/version/\"gal\" => \"gal\")
+            end
+
+            def post_install
+              install_root = var/\"gal\"/version
+              install_root.mkpath
+
+              dest = install_root/\"gal\"
+              dest.delete if dest.exist?
+              dest.write((libexec/\"gal-real\").binread, mode: \"wb\")
+              dest.chmod(0755)
+            end
+
+            test do
+              assert_match version.to_s, shell_output(\"#{{bin}}/gal --version\")
+            end
+          end
+          """
+
+          Path("Formula").mkdir(exist_ok=True)
+          Path("Formula/gal.rb").write_text(formula)
+          PY
+
       - name: Commit and open PR
         env:
           GH_TOKEN: ${{ github.token }}
@@ -55,7 +137,8 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md CHANGELOG.md
+          rm -f Casks/gal.rb
+          git add README.md CHANGELOG.md Formula/gal.rb Casks/gal.rb
           if ! git diff --staged --quiet; then
             BRANCH="release/v${VERSION}"
             git checkout -b "$BRANCH"
@@ -86,7 +169,13 @@ jobs:
           else
             gh release create "v$VERSION" \
               --title "v$VERSION" \
-              --notes "Install or update: \`npm install -g @scheduler-systems/gal-run\`
+              --notes "Install or update:
+
+          \`brew tap scheduler-systems/gal-run https://github.com/Scheduler-Systems/gal-run.git && brew install gal\`
+
+          or
+
+          \`npm install -g @scheduler-systems/gal-run\`
 
           See [npm package](https://www.npmjs.com/package/@scheduler-systems/gal-run/v/$VERSION) for details."
           fi

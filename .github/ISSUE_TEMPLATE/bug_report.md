@@ -6,6 +6,9 @@ labels: bug
 assignees: ''
 ---
 
+> [!WARNING]
+> This is a **public** repository. Do not include internal repo names, runner labels, secret names, GCS bucket paths, or any other private infrastructure details. If your issue contains internal content, open it in the private repo instead.
+
 ## Description
 A clear description of the bug.
 

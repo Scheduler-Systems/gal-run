@@ -11,7 +11,7 @@ permissions:
 jobs:
   triage:
     if: contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)
-    runs-on: ubuntu-latest
+    runs-on: ci-standard-runc
     steps:
       - uses: actions/checkout@v4
 

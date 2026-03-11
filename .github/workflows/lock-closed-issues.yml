@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   lock:
-    runs-on: ci-standard-runc
+    runs-on: ubuntu-latest
     steps:
       - uses: dessant/lock-threads@v5
         with:

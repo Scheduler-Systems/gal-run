@@ -6,7 +6,7 @@ on:
 
 jobs:
   gate:
-    runs-on: ci-standard-runc
+    runs-on: ubuntu-latest
     steps:
       - run: echo "Ready to merge"
 

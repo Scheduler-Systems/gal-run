@@ -27,13 +27,6 @@ jobs:
           VERSION="${{ github.event.client_payload.version || github.event.inputs.version }}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Generate GitHub App Token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.ARC_APP_ID }}
-          private-key: ${{ secrets.ARC_PRIVATE_KEY }}
-
       - name: Update version in README
         run: |
           VERSION="${{ steps.version.outputs.version }}"
@@ -55,9 +48,9 @@ jobs:
             } > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
           fi
 
-      - name: Commit and push via PR
+      - name: Commit and open PR
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           git config user.name "github-actions[bot]"
@@ -68,26 +61,23 @@ jobs:
             git checkout -b "$BRANCH"
             git commit -m "Release v$VERSION"
             git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
-            # Push to feature branch (not protected by rulesets)
             git push origin "$BRANCH" --force
-            # Create PR and merge via API (app token bypasses branch protection)
-            PR_URL=$(gh pr create --base main --head "$BRANCH" \
-              --title "Release v$VERSION" \
-              --body "Automated release version update" \
-              --repo "${{ github.repository }}")
-            PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-            # Merge immediately - app token has bypass_mode: "always" on rulesets
-            gh api "repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" \
-              -X PUT -f merge_method="squash"
-            # Clean up release branch
-            git push origin --delete "$BRANCH" || true
+            EXISTING_PR=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" --base main --state open --json url --jq '.[0].url')
+            if [ -n "$EXISTING_PR" ]; then
+              echo "Release PR already open: $EXISTING_PR"
+            else
+              gh pr create --base main --head "$BRANCH" \
+                --title "Release v$VERSION" \
+                --body "Automated release version update. Manual review is required before merge." \
+                --repo "${{ github.repository }}"
+            fi
           else
             echo "No changes to commit - version already up to date"
           fi
 
       - name: Create GitHub Release
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           # Skip if release already exists

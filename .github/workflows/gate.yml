@@ -8,8 +8,19 @@ jobs:
   gate:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Ready to merge"
+      - uses: actions/checkout@v4
 
-  # runner-policy check is not available for public repos
-  # (scheduler-systems/infra is a private repo)
-  # The policy is enforced on the private repo (gal-run-private) instead.
+      - name: Public surface check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if grep -RInE \
+            --exclude='gate.yml' \
+            'Scheduler-Systems/infra|gal-run-private|arc-linux|ci-standard-runc|docker-dind-x64|macos-host|bare-high-arm64' \
+            .github README.md CHANGELOG.md; then
+            echo "::error::Public repo contains internal-only references. Remove private repo links, private runner labels, and internal infrastructure details."
+            exit 1
+          fi
+
+          echo "Public surface clean."

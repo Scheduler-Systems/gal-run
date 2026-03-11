@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   triage:
-    runs-on: ci-standard-runc
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 

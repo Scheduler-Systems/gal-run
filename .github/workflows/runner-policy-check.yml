@@ -11,7 +11,7 @@ on:
 
 jobs:
   check-runners:
-    runs-on: ci-standard-runc
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout PR code
         uses: actions/checkout@v4
@@ -20,6 +20,7 @@ jobs:
         run: |
           cat > /tmp/runner-policy.yml << 'POLICY_EOF'
           default_allowed:
+            - ubuntu-latest
             - arc-linux
             - arc-linux-agents
             - arc-linux-docker

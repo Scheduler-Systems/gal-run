@@ -39,7 +39,7 @@ jobs:
         (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) &&
         contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)
       )
-    runs-on: ubuntu-latest
+    runs-on: ci-standard-runc
     steps:
       - uses: actions/checkout@v4
         with:

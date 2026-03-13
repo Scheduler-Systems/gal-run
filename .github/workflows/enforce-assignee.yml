@@ -21,7 +21,7 @@ jobs:
   # ── Event-driven: assign opener when issue is opened/reopened ──
   on-issue:
     if: github.event_name == 'issues'
-    runs-on: ci-standard-runc
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       issues: write
@@ -47,7 +47,7 @@ jobs:
   # ── Manual: backfill all open issues missing an assignee ──
   reconcile:
     if: github.event_name == 'workflow_dispatch'
-    runs-on: ci-standard-runc
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       issues: write

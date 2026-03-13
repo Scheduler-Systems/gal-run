@@ -9,7 +9,7 @@ concurrency:
 permissions: {}
 jobs:
   require-issue-reference:
-    runs-on: ci-standard-runc
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read

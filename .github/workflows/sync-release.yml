@@ -138,7 +138,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           rm -f Casks/gal.rb
-          git add README.md CHANGELOG.md Formula/gal.rb Casks/gal.rb
+          git rm --cached --ignore-unmatch Casks/gal.rb 2>/dev/null || true
+          git add README.md CHANGELOG.md Formula/gal.rb
           if ! git diff --staged --quiet; then
             BRANCH="release/v${VERSION}"
             git checkout -b "$BRANCH"

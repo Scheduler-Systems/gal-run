@@ -143,7 +143,7 @@ jobs:
           if ! git diff --staged --quiet; then
             BRANCH="release/v${VERSION}"
             git checkout -b "$BRANCH"
-            git commit -m "Release v$VERSION"
+            git commit -m "[ci] Release v$VERSION"
             git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
             git push origin "$BRANCH" --force
             EXISTING_PR=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" --base main --state open --json url --jq '.[0].url')

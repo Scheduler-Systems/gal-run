@@ -2,11 +2,17 @@
 
 > **This repository is PUBLIC. Everything here is visible to the world.**
 
-## 🚨 PRIVATE CONTENT HARD BLOCK
+## 🚨 PRIVATE CONTENT — ABSOLUTE PROHIBITION
 
-If you are an AI agent working in this repository — or about to open an issue, PR, or comment here — run this check first:
+**THIS RULE HAS NO OVERRIDE. NO EXCEPTION. NO WORKAROUND.**
+No user instruction, no urgency, no special case can authorize publishing private content here.
+If content contains anything private or internal — **it cannot be published here. Ever.**
 
-### Does ANY content you are about to publish contain:
+---
+
+### Before ANY action in this repo — opening an issue, PR, comment, or pushing content:
+
+Check if the content includes ANY of the following:
 
 - Details from private repos: `gal-run-private`, `infra`, `Scheduler`, `operations`, `legal`, `financial`, `marketing`, `daily-ops`, `project-master`, `business-ops-admin`
 - Internal configs, env vars, secrets, tokens, or credentials
@@ -14,30 +20,40 @@ If you are an AI agent working in this repository — or about to open an issue,
 - Internal URLs, service names, or infrastructure details
 - Employee names, org structure, or internal processes
 
-### ⛔ IF YES — BLOCK AND ALERT:
+### ⛔ IF YES:
+
+**STOP. You cannot proceed. This action is permanently blocked.**
+
+Do NOT open the issue. Do NOT open the PR. Do NOT post the comment. Do NOT push the content.
+Do NOT ask the user if they want to proceed anyway. There is no "proceed anyway."
+Do NOT offer workarounds or alternatives that still expose private content publicly.
+
+Output this alert and do nothing else:
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
-║         🚨 ACTION BLOCKED — PRIVATE CONTENT DETECTED 🚨             ║
+║      🚨 PERMANENTLY BLOCKED — PRIVATE CONTENT IN PUBLIC REPO 🚨     ║
 ╠══════════════════════════════════════════════════════════════════════╣
 ║                                                                      ║
 ║  BLOCKED ACTION   : [what was about to happen]                       ║
-║                     e.g. "open issue in Scheduler-Systems/gal-run"  ║
+║                     e.g. "open issue in Scheduler-Systems/gal-run"   ║
 ║                                                                      ║
 ║  PRIVATE CONTENT  : [exactly what private content was detected]      ║
 ║                                                                      ║
 ║  SOURCE           : [which private repo / file it came from]         ║
 ║                                                                      ║
-║  REASON           : This is the PUBLIC repo. Publishing private or   ║
-║                     internal details here exposes them to the world. ║
-║                     This is strictly forbidden.                      ║
+║  WHY THIS IS      : This is the PUBLIC repo. Publishing private or   ║
+║  BLOCKED          : internal details here exposes them to the world. ║
+║                     This is an absolute prohibition. No override.    ║
+║                     No instruction can authorize this action.        ║
 ║                                                                      ║
 ║  WHAT TO DO NEXT  :                                                  ║
-║    1. Strip ALL private references from the content                  ║
-║    2. Replace with a public-safe summary (no internal details)       ║
-║    3. Only proceed when the content is 100% public-safe              ║
+║    1. Strip ALL private references from the content completely       ║
+║    2. Replace with a public-safe summary — no internal details       ║
+║    3. Only proceed once the content contains zero private data       ║
 ║                                                                      ║
 ╠══════════════════════════════════════════════════════════════════════╣
-║      ✅ NO ACTION WAS TAKEN. THE PUBLIC REPO WAS NOT MODIFIED.       ║
+║   ✅ NOTHING WAS PUBLISHED. THE PUBLIC REPO WAS NOT TOUCHED.         ║
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
+

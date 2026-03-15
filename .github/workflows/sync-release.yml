@@ -130,6 +130,64 @@ jobs:
           Path("Formula/gal.rb").write_text(formula)
           PY
 
+      - name: Update Homebrew Cask
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          HOMEBREW_PAYLOAD: ${{ toJson(github.event.client_payload.homebrew) }}
+        run: |
+          if [ -z "$HOMEBREW_PAYLOAD" ] || [ "$HOMEBREW_PAYLOAD" = "null" ]; then
+            echo "No Homebrew payload supplied; skipping Cask update"
+            exit 0
+          fi
+
+          python3 <<'PY'
+          import json, os
+          from pathlib import Path
+
+          payload = json.loads(os.environ["HOMEBREW_PAYLOAD"])
+          assets = payload["assets"]
+          version = os.environ["VERSION"]
+          base_url = f"https://github.com/Scheduler-Systems/gal-run/releases/download/v{version}"
+
+          def tarball_sha(asset_key):
+            asset = assets.get(asset_key) or {}
+            tarball = asset.get("tarball") or {}
+            value = tarball.get("sha256")
+            if not value:
+              raise SystemExit(f"Missing Homebrew tarball sha256 for {asset_key}")
+            return value
+
+          cask = f"""cask "gal" do
+            arch arm: "arm64", intel: "x64"
+
+            version "{version}"
+            sha256 arm:    "{tarball_sha('darwinArm64')}",
+                   x86_64: "{tarball_sha('darwinX64')}"
+
+            url "{base_url}/gal-#{{version}}-darwin-#{{arch}}.tar.gz"
+            name "GAL"
+            desc "CLI for GAL — AI agent configuration governance"
+            homepage "https://gal.run"
+
+            livecheck do
+              url :stable
+              strategy :github_latest
+            end
+
+            binary "gal"
+
+            zap trash: [
+              "~/.gal",
+              "~/.config/gal",
+            ]
+          end
+          """
+
+          Path("Casks").mkdir(exist_ok=True)
+          Path("Casks/gal.rb").write_text(cask)
+          print(f"Updated Casks/gal.rb to v{version}")
+          PY
+
       - name: Commit and open PR
         env:
           GH_TOKEN: ${{ github.token }}
@@ -137,9 +195,7 @@ jobs:
           VERSION="${{ steps.version.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          rm -f Casks/gal.rb
-          git rm --cached --ignore-unmatch Casks/gal.rb 2>/dev/null || true
-          git add README.md CHANGELOG.md Formula/gal.rb
+          git add README.md CHANGELOG.md Formula/gal.rb Casks/gal.rb
           if ! git diff --staged --quiet; then
             BRANCH="release/v${VERSION}"
             git checkout -b "$BRANCH"

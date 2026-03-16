@@ -153,6 +153,10 @@ For reference filesystem helpers around workspace scope, project scope, and acti
 
 - [../reference/filesystem-helpers.mjs](../reference/filesystem-helpers.mjs)
 
+For reference document I/O around workspace/project config files and sync-state sidecars, see:
+
+- [../reference/config-documents.mjs](../reference/config-documents.mjs)
+
 ## Organization Setup
 
 For administrators setting up GAL for your organization, see the [Admin Guide](https://docs.gal.run/admin).

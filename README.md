@@ -15,6 +15,45 @@ GAL provides centralized configuration management and governance for AI coding a
 
 **[Get started free at app.gal.run](https://app.gal.run)**
 
+## CLI
+
+Install:
+
+```bash
+curl -fsSL https://gal.run/install.sh | bash
+```
+
+Local mode:
+
+```bash
+# Discover your existing AI agent configs
+gal scan
+
+# Standardize them into .gal/config.yaml
+gal approve --local
+
+# Distribute the canonical GAL config to your agents
+gal sync
+```
+
+Org sync:
+
+```bash
+gal auth login
+gal sync --pull
+```
+
+Update:
+
+```bash
+gal update
+
+# or with your package manager
+brew upgrade gal
+npm install -g @scheduler-systems/gal-run@latest
+pnpm add -g @scheduler-systems/gal-run@latest
+```
+
 ## MCP Server
 
 GAL exposes an MCP server so your AI coding agent can access governance tools directly. Connect your agent to `https://api.gal.run/mcp`:
@@ -31,6 +70,8 @@ GAL exposes an MCP server so your AI coding agent can access governance tools di
 ```
 
 Authentication is handled automatically via OAuth — your MCP client will be redirected to sign in on first use.
+
+MCP client compatibility is broader than local CLI config support. The list below covers clients that can connect to GAL over MCP; the local CLI support matrix is listed separately under Supported Agents.
 
 ### MCP Client configuration
 
@@ -161,45 +202,6 @@ Follow the <a href="https://docs.windsurf.com/windsurf/cascade/mcp#mcp-config-js
 
 </details>
 
-## CLI
-
-Install:
-
-```bash
-curl -fsSL https://gal.run/install.sh | bash
-```
-
-Local mode:
-
-```bash
-# Discover your existing AI agent configs
-gal scan
-
-# Standardize them into .gal/config.yaml
-gal approve --local
-
-# Distribute the canonical GAL config to your agents
-gal sync
-```
-
-Org sync:
-
-```bash
-gal auth login
-gal sync --pull
-```
-
-Update:
-
-```bash
-gal update
-
-# or with your package manager
-brew upgrade gal
-npm install -g @scheduler-systems/gal-run@latest
-pnpm add -g @scheduler-systems/gal-run@latest
-```
-
 ## Roadmap
 
 The next public CLI milestone is a local-first workspace model:
@@ -223,15 +225,18 @@ See [docs/workspace-model.md](docs/workspace-model.md) for the target scope mode
 
 ## Supported Agents
 
-| Agent | Config Files | Status |
-|-------|-------------|--------|
-| Claude Code | `.claude/`, `CLAUDE.md` | Supported |
-| Cursor | `.cursor/`, `.cursorrules` | Supported |
-| Windsurf | `.windsurfrules` | Supported |
-| GitHub Copilot | `.github/copilot-instructions.md` | Supported |
-| Aider | `.aider*` | Supported |
-| Cline | `.clinerules`, `.cline/` | Supported |
-| Amazon Q | `.amazonq/` | Coming Soon |
+This table is for local CLI support. MCP client compatibility is broader and is documented separately in the MCP section above.
+
+| Agent | Config Files | Local Scan | Local Sync | Memory |
+|-------|-------------|-----------|-----------|--------|
+| Claude Code | `.claude/`, `CLAUDE.md` | ✓ | ✓ | Native |
+| Cursor | `.cursor/rules/`, `.cursorrules` | ✓ | ✓ | Via GAL |
+| GitHub Copilot | `.github/copilot-instructions.md` | ✓ | ✓ | Via GAL |
+| Gemini CLI | `.gemini/`, `GEMINI.md` | ✓ | ✓ | Via GAL |
+| Codex (OpenAI) | `AGENTS.md` | ✓ | ✓ | Via GAL |
+| Windsurf | `.windsurfrules`, `.codeium/windsurf/memories/` | ✓ | ✓ | Native |
+| Antigravity | `.gemini/antigravity/` | ✓ | ✓ | Native |
+| Amp | `AGENTS.md` | ✓ | ✓ | Via GAL |
 
 ## Documentation
 

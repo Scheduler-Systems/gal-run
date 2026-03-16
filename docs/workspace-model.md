@@ -120,6 +120,8 @@ The first public schema drafts live here:
 - [schemas/project-config.schema.json](../schemas/project-config.schema.json)
 - [examples/workspace-config.yaml](../examples/workspace-config.yaml)
 - [examples/project-config.yaml](../examples/project-config.yaml)
+- [docs/merge-rules.md](merge-rules.md)
+- [reference/resolve-config.mjs](../reference/resolve-config.mjs)
 
 ## PR Policy For Public Work
 

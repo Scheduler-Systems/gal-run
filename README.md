@@ -166,16 +166,16 @@ Follow the <a href="https://docs.windsurf.com/windsurf/cascade/mcp#mcp-config-js
 Install:
 
 ```bash
-# macOS / Linux
 curl -fsSL https://gal.run/install.sh | bash
-
-# Windows PowerShell
-iwr -useb https://gal.run/install.ps1 | iex
 ```
 
-Or use a package manager:
+<details>
+<summary>Other install methods</summary>
 
 ```bash
+# Windows PowerShell
+iwr -useb https://gal.run/install.ps1 | iex
+
 # Homebrew
 brew tap scheduler-systems/gal-run https://github.com/Scheduler-Systems/gal-run.git
 brew install gal
@@ -186,6 +186,8 @@ npm install -g @scheduler-systems/gal-run
 # pnpm
 pnpm add -g @scheduler-systems/gal-run
 ```
+
+</details>
 
 Local mode:
 

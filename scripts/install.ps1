@@ -36,7 +36,7 @@ try {
     Write-Host ""
     Write-Host "Next steps:"
     Write-Host "  gal scan              # Discover local AI agent configs"
-    Write-Host "  gal approve --local   # Standardize into .gal/config.yaml"
+    Write-Host "  gal approve --local   # Standardize into ~/.gal/config.yaml"
     Write-Host "  gal sync              # Distribute to your coding agents"
     Write-Host ""
     Write-Host "Optional org sync:"

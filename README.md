@@ -29,7 +29,7 @@ Local mode:
 # Discover your existing AI agent configs
 gal scan
 
-# Standardize them into .gal/config.yaml
+# Standardize them into ~/.gal/config.yaml
 gal approve --local
 
 # Distribute the canonical GAL config to your agents
@@ -202,21 +202,21 @@ Follow the <a href="https://docs.windsurf.com/windsurf/cascade/mcp#mcp-config-js
 
 </details>
 
-## Roadmap
+## Local Model
 
-The next public CLI milestone is a local-first workspace model:
+The current local CLI model is:
 
-- Workspace-scoped GAL config under `~/.gal/workspaces/<workspace>/`
-- Repo-scoped overrides under `<repo>/.gal/`
-- Explicit promotion from local workspace state into GAL Cloud or org workflows
-- Incremental publication of public CLI source into this repository
+- Workspace-scoped GAL config under `~/.gal/config.yaml`
+- Repo-scoped overrides under `<repo>/.gal/config.yaml`
+- Project overrides take precedence over workspace defaults
+- Incremental publication of more local CLI source into this repository
 
-See [docs/workspace-model.md](docs/workspace-model.md) for the target scope model and rollout plan.
+See [docs/workspace-model.md](docs/workspace-model.md) for the current scope model and public extraction plan.
 
 ## Features
 
 - **Local Scan**: Discover AI agent configs on your machine without auth or cloud setup
-- **Local Standardize**: Merge discovered configs into a canonical `.gal/config.yaml`
+- **Local Standardize**: Merge discovered configs into a canonical `~/.gal/config.yaml`
 - **Local Sync**: Distribute the canonical GAL config across Claude, Cursor, Copilot, Gemini, Codex, Windsurf, and more
 - **MCP Server**: Connect any AI coding agent to your org's governance policies
 - **Centralized Management**: One dashboard to manage configs for Claude Code, Cursor, Windsurf, and more

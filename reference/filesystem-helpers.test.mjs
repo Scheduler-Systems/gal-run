@@ -1,73 +1,25 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
 import {
   findProjectRoot,
-  getCurrentWorkspacePath,
   getProjectConfigPath,
   getWorkspaceConfigPath,
-  readCurrentWorkspaceSelection,
-  resolveActiveWorkspace,
-  writeCurrentWorkspaceSelection,
+  getWorkspaceSyncStatePath,
 } from './filesystem-helpers.mjs';
 
-test('workspace helper paths use ~/.gal/workspaces/<workspace>', () => {
+test('workspace helper paths use ~/.gal/config.yaml and ~/.gal/sync-state.json', () => {
   const homeDir = '/tmp/gal-home';
   assert.equal(
-    getWorkspaceConfigPath('scheduler-systems', { homeDir }),
-    '/tmp/gal-home/.gal/workspaces/scheduler-systems/config.yaml'
+    getWorkspaceConfigPath({ homeDir }),
+    '/tmp/gal-home/.gal/config.yaml'
   );
   assert.equal(
-    getCurrentWorkspacePath({ homeDir }),
-    '/tmp/gal-home/.gal/state/current-workspace.json'
-  );
-});
-
-test('current workspace selection round-trips through ~/.gal/state/current-workspace.json', () => {
-  const homeDir = mkdtempSync(join(tmpdir(), 'gal-home-'));
-
-  writeCurrentWorkspaceSelection('scheduler-systems', { homeDir });
-
-  assert.equal(
-    readCurrentWorkspaceSelection({ homeDir }),
-    'scheduler-systems'
-  );
-
-  const statePath = getCurrentWorkspacePath({ homeDir });
-  const raw = JSON.parse(readFileSync(statePath, 'utf-8'));
-  assert.deepEqual(raw, { workspace: 'scheduler-systems' });
-});
-
-test('resolveActiveWorkspace honors explicit, project, git, current, then fallback order', () => {
-  assert.equal(
-    resolveActiveWorkspace({
-      explicitWorkspace: 'explicit',
-      projectWorkspaceRef: 'project',
-      gitOwner: 'owner',
-      currentWorkspace: 'current',
-      fallbackWorkspace: 'personal',
-    }),
-    'explicit'
-  );
-
-  assert.equal(
-    resolveActiveWorkspace({
-      projectWorkspaceRef: 'project',
-      gitOwner: 'owner',
-      currentWorkspace: 'current',
-      fallbackWorkspace: 'personal',
-    }),
-    'project'
-  );
-
-  assert.equal(
-    resolveActiveWorkspace({
-      currentWorkspace: 'current',
-    }),
-    'current'
+    getWorkspaceSyncStatePath({ homeDir }),
+    '/tmp/gal-home/.gal/sync-state.json'
   );
 });
 

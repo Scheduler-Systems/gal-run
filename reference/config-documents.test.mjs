@@ -25,11 +25,11 @@ test('workspace config documents round-trip as raw YAML text', () => {
     '',
   ].join('\n');
 
-  const written = writeWorkspaceConfigDocument('personal', content, { homeDir });
+  const written = writeWorkspaceConfigDocument(content, { homeDir });
   assert.equal(written.exists, true);
   assert.equal(written.content, content);
 
-  const readBack = readWorkspaceConfigDocument('personal', { homeDir });
+  const readBack = readWorkspaceConfigDocument({ homeDir });
   assert.deepEqual(readBack, written);
 });
 
@@ -59,11 +59,11 @@ test('workspace sync state round-trips as JSON sidecar data', () => {
     source: 'local',
   };
 
-  const written = writeWorkspaceSyncState('personal', state, { homeDir });
+  const written = writeWorkspaceSyncState(state, { homeDir });
   assert.equal(written.exists, true);
   assert.deepEqual(written.value, state);
 
-  const readBack = readWorkspaceSyncState('personal', { homeDir });
+  const readBack = readWorkspaceSyncState({ homeDir });
   assert.deepEqual(readBack, written);
 });
 
@@ -86,8 +86,8 @@ test('missing config documents return a stable null payload', () => {
   const homeDir = mkdtempSync(join(tmpdir(), 'gal-home-'));
   const projectRoot = mkdtempSync(join(tmpdir(), 'gal-project-'));
 
-  assert.deepEqual(readWorkspaceConfigDocument('personal', { homeDir }), {
-    path: join(homeDir, '.gal', 'workspaces', 'personal', 'config.yaml'),
+  assert.deepEqual(readWorkspaceConfigDocument({ homeDir }), {
+    path: join(homeDir, '.gal', 'config.yaml'),
     exists: false,
     content: null,
   });

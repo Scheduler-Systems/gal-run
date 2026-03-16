@@ -163,7 +163,7 @@ Follow the <a href="https://docs.windsurf.com/windsurf/cascade/mcp#mcp-config-js
 
 ## CLI
 
-Install or update the GAL CLI:
+Install:
 
 ```bash
 # macOS / Linux
@@ -187,7 +187,7 @@ npm install -g @scheduler-systems/gal-run
 pnpm add -g @scheduler-systems/gal-run
 ```
 
-Local mode works fully offline:
+Local mode:
 
 ```bash
 # Discover your existing AI agent configs
@@ -200,14 +200,14 @@ gal approve --local
 gal sync
 ```
 
-Connect to your org when you want workspace-backed sync:
+Org sync:
 
 ```bash
 gal auth login
 gal sync --pull
 ```
 
-To update later:
+Update:
 
 ```bash
 gal update
@@ -263,12 +263,12 @@ Access your organization's dashboard at [app.gal.run](https://app.gal.run)
 
 - **Issues**: Use this repository for bug reports and feature requests
 - **Discussions**: Community support and questions
-- **Email**: contact@gal.run
+- **Email**: support@scheduler-systems.com
 - **Enterprise**: For enterprise inquiries, contact sales@scheduler-systems.com
 
 ## About
 
-GAL is built by [Scheduler Systems](https://scheduler-systems.com), a company focused on developer tooling and AI governance.
+GAL is built by [Scheduler Systems](https://scheduler-systems.com), which builds developer tools, scheduling software, and AI governance products.
 
 ## License
 

@@ -1,4 +1,4 @@
-# GAL CLI Installer for Windows
+# GAL CLI Installer / Updater for Windows
 # Usage: iwr -useb https://gal.run/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
@@ -20,8 +20,11 @@ try {
     exit 1
 }
 
-# Install via npm
-Write-Host "Installing GAL CLI..."
+if (Get-Command gal -ErrorAction SilentlyContinue) {
+    Write-Host "Updating GAL CLI..."
+} else {
+    Write-Host "Installing GAL CLI..."
+}
 npm install -g @scheduler-systems/gal-run
 
 # Verify installation
@@ -32,8 +35,16 @@ try {
     Write-Host $galVersion
     Write-Host ""
     Write-Host "Next steps:"
-    Write-Host "  gal auth login    # Authenticate with GitHub"
-    Write-Host "  gal sync --pull   # Sync approved config"
+    Write-Host "  gal scan              # Discover local AI agent configs"
+    Write-Host "  gal approve --local   # Standardize into .gal/config.yaml"
+    Write-Host "  gal sync              # Distribute to your coding agents"
+    Write-Host ""
+    Write-Host "Optional org sync:"
+    Write-Host "  gal auth login        # Authenticate with GitHub"
+    Write-Host "  gal sync --pull       # Pull org-approved config"
+    Write-Host ""
+    Write-Host "Update later:"
+    Write-Host "  gal update"
 } catch {
     Write-Host "Installation may require a new terminal window." -ForegroundColor Yellow
 }

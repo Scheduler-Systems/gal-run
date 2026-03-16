@@ -137,6 +137,26 @@ After running `gal sync --pull`, your agent configuration will be updated:
 └── settings.json      # Organization-approved settings
 ```
 
+## Workspace Model Reference
+
+The public repo also includes draft workspace and project config examples:
+
+- [workspace-config.yaml](workspace-config.yaml)
+- [project-config.yaml](project-config.yaml)
+
+For reference merge behavior between workspace scope and repo overrides, see:
+
+- [../docs/merge-rules.md](../docs/merge-rules.md)
+- [../reference/resolve-config.mjs](../reference/resolve-config.mjs)
+
+For reference filesystem helpers around workspace scope, project scope, and active workspace selection, see:
+
+- [../reference/filesystem-helpers.mjs](../reference/filesystem-helpers.mjs)
+
+For reference document I/O around workspace/project config files and sync-state sidecars, see:
+
+- [../reference/config-documents.mjs](../reference/config-documents.mjs)
+
 ## Organization Setup
 
 For administrators setting up GAL for your organization, see the [Admin Guide](https://docs.gal.run/admin).

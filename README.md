@@ -163,38 +163,81 @@ Follow the <a href="https://docs.windsurf.com/windsurf/cascade/mcp#mcp-config-js
 
 ## CLI
 
-Install the GAL CLI for config sync and policy checking:
+Install or update the GAL CLI:
 
 ```bash
+# macOS / Linux
+curl -fsSL https://gal.run/install.sh | bash
+
+# Windows PowerShell
+iwr -useb https://gal.run/install.ps1 | iex
+```
+
+Or use a package manager:
+
+```bash
+# Homebrew
 brew tap scheduler-systems/gal-run https://github.com/Scheduler-Systems/gal-run.git
 brew install gal
-```
 
-Or install from npm:
-
-```bash
+# npm
 npm install -g @scheduler-systems/gal-run
+
+# pnpm
+pnpm add -g @scheduler-systems/gal-run
 ```
+
+Local mode works fully offline:
 
 ```bash
-# Authenticate with GitHub
-gal auth login
+# Discover your existing AI agent configs
+gal scan
 
-# Pull approved configs to your local machine
-gal sync --pull
+# Standardize them into .gal/config.yaml
+gal approve --local
 
-# Check for policy violations before committing
-gal check
+# Distribute the canonical GAL config to your agents
+gal sync
 ```
+
+Connect to your org when you want workspace-backed sync:
+
+```bash
+gal auth login
+gal sync --pull
+```
+
+To update later:
+
+```bash
+gal update
+
+# or with your package manager
+brew upgrade gal
+npm install -g @scheduler-systems/gal-run@latest
+pnpm add -g @scheduler-systems/gal-run@latest
+```
+
+## Roadmap
+
+The next public CLI milestone is a local-first workspace model:
+
+- Workspace-scoped GAL config under `~/.gal/workspaces/<workspace>/`
+- Repo-scoped overrides under `<repo>/.gal/`
+- Explicit promotion from local workspace state into GAL Cloud or org workflows
+- Incremental publication of public CLI source into this repository
+
+See [docs/workspace-model.md](docs/workspace-model.md) for the target scope model and rollout plan.
 
 ## Features
 
+- **Local Scan**: Discover AI agent configs on your machine without auth or cloud setup
+- **Local Standardize**: Merge discovered configs into a canonical `.gal/config.yaml`
+- **Local Sync**: Distribute the canonical GAL config across Claude, Cursor, Copilot, Gemini, Codex, Windsurf, and more
 - **MCP Server**: Connect any AI coding agent to your org's governance policies
-- **Auto-Discovery**: Automatically find every AI agent configuration across your repositories
 - **Centralized Management**: One dashboard to manage configs for Claude Code, Cursor, Windsurf, and more
 - **Policy Enforcement**: Define and enforce organization-wide standards
-- **CLI Sync**: Keep local configs in sync with approved team standards
-- **GitHub Integration**: Native GitHub App for seamless repository scanning
+- **GitHub Integration**: Native GitHub App for repository discovery and org-backed sync
 
 ## Supported Agents
 

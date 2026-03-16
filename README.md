@@ -187,6 +187,17 @@ gal sync --pull
 gal check
 ```
 
+## Roadmap
+
+The next public CLI milestone is a local-first workspace model:
+
+- Workspace-scoped GAL config under `~/.gal/workspaces/<workspace>/`
+- Repo-scoped overrides under `<repo>/.gal/`
+- Explicit promotion from local workspace state into GAL Cloud or org workflows
+- Incremental publication of public CLI source into this repository
+
+See [docs/workspace-model.md](docs/workspace-model.md) for the target scope model and rollout plan.
+
 ## Features
 
 - **MCP Server**: Connect any AI coding agent to your org's governance policies

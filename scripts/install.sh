@@ -1,5 +1,5 @@
 #!/bin/bash
-# GAL CLI Installer
+# GAL CLI Installer / Updater
 # Usage: curl -fsSL https://gal.run/install.sh | bash
 
 set -e
@@ -25,8 +25,11 @@ if [ "$NODE_VERSION" -lt 18 ]; then
     exit 1
 fi
 
-# Install via npm
-echo "Installing GAL CLI..."
+if command -v gal &> /dev/null; then
+    echo "Updating GAL CLI..."
+else
+    echo "Installing GAL CLI..."
+fi
 npm install -g @scheduler-systems/gal-run
 
 # Verify installation
@@ -37,8 +40,16 @@ if command -v gal &> /dev/null; then
     gal --version
     echo ""
     echo "Next steps:"
-    echo "  gal auth login    # Authenticate with GitHub"
-    echo "  gal sync --pull   # Sync approved config"
+    echo "  gal scan              # Discover local AI agent configs"
+    echo "  gal approve --local   # Standardize into .gal/config.yaml"
+    echo "  gal sync              # Distribute to your coding agents"
+    echo ""
+    echo "Optional org sync:"
+    echo "  gal auth login        # Authenticate with GitHub"
+    echo "  gal sync --pull       # Pull org-approved config"
+    echo ""
+    echo "Update later:"
+    echo "  gal update"
     echo ""
 else
     echo -e "${RED}Installation failed. Please try: npm install -g @scheduler-systems/gal-run${RESET}"

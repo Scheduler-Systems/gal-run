@@ -149,6 +149,10 @@ For reference merge behavior between workspace scope and repo overrides, see:
 - [../docs/merge-rules.md](../docs/merge-rules.md)
 - [../reference/resolve-config.mjs](../reference/resolve-config.mjs)
 
+For reference filesystem helpers around workspace scope, project scope, and active workspace selection, see:
+
+- [../reference/filesystem-helpers.mjs](../reference/filesystem-helpers.mjs)
+
 ## Organization Setup
 
 For administrators setting up GAL for your organization, see the [Admin Guide](https://docs.gal.run/admin).

@@ -122,6 +122,13 @@ The first public schema drafts live here:
 - [examples/project-config.yaml](../examples/project-config.yaml)
 - [docs/merge-rules.md](merge-rules.md)
 - [reference/resolve-config.mjs](../reference/resolve-config.mjs)
+- [reference/filesystem-helpers.mjs](../reference/filesystem-helpers.mjs)
+
+The current public helper layer now also includes:
+
+- workspace and project path helpers for `~/.gal/workspaces/<workspace>/` and `<repo>/.gal/`
+- current-workspace state helpers for `~/.gal/state/current-workspace.json`
+- project-root discovery that falls back to `.claude/` and `.gal/` when `.git` is absent
 
 ## PR Policy For Public Work
 

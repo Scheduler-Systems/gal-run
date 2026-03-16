@@ -68,12 +68,12 @@ function writeJsonDocument(filePath, value) {
   return readJsonDocument(filePath);
 }
 
-export function readWorkspaceConfigDocument(workspaceName, options = {}) {
-  return readTextDocument(getWorkspaceConfigPath(workspaceName, options));
+export function readWorkspaceConfigDocument(options = {}) {
+  return readTextDocument(getWorkspaceConfigPath(options));
 }
 
-export function writeWorkspaceConfigDocument(workspaceName, content, options = {}) {
-  return writeTextDocument(getWorkspaceConfigPath(workspaceName, options), content);
+export function writeWorkspaceConfigDocument(content, options = {}) {
+  return writeTextDocument(getWorkspaceConfigPath(options), content);
 }
 
 export function readProjectConfigDocument(projectRoot) {
@@ -84,12 +84,12 @@ export function writeProjectConfigDocument(projectRoot, content) {
   return writeTextDocument(getProjectConfigPath(projectRoot), content);
 }
 
-export function readWorkspaceSyncState(workspaceName, options = {}) {
-  return readJsonDocument(getWorkspaceSyncStatePath(workspaceName, options));
+export function readWorkspaceSyncState(options = {}) {
+  return readJsonDocument(getWorkspaceSyncStatePath(options));
 }
 
-export function writeWorkspaceSyncState(workspaceName, value, options = {}) {
-  return writeJsonDocument(getWorkspaceSyncStatePath(workspaceName, options), value);
+export function writeWorkspaceSyncState(value, options = {}) {
+  return writeJsonDocument(getWorkspaceSyncStatePath(options), value);
 }
 
 export function readProjectSyncState(projectRoot) {

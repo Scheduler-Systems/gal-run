@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, parse, resolve } from 'node:path';
 
@@ -33,15 +33,6 @@ function validatePathSegment(name, label) {
   return value;
 }
 
-function firstDefinedValue(values) {
-  for (const value of values) {
-    if (typeof value === 'string' && value.trim()) {
-      return value.trim();
-    }
-  }
-  return null;
-}
-
 export function getGalRoot({ homeDir = homedir() } = {}) {
   return join(resolve(validatePathString(homeDir, 'Home directory')), '.gal');
 }
@@ -50,75 +41,12 @@ export function getGalStateDir(options = {}) {
   return join(getGalRoot(options), 'state');
 }
 
-export function getCurrentWorkspacePath(options = {}) {
-  return join(getGalStateDir(options), 'current-workspace.json');
+export function getWorkspaceConfigPath(options = {}) {
+  return join(getGalRoot(options), 'config.yaml');
 }
 
-export function getWorkspacesDir(options = {}) {
-  return join(getGalRoot(options), 'workspaces');
-}
-
-export function sanitizeWorkspaceName(name) {
-  return validatePathSegment(name, 'Workspace name');
-}
-
-export function getWorkspaceDir(workspaceName, options = {}) {
-  return join(getWorkspacesDir(options), sanitizeWorkspaceName(workspaceName));
-}
-
-export function getWorkspaceConfigPath(workspaceName, options = {}) {
-  return join(getWorkspaceDir(workspaceName, options), 'config.yaml');
-}
-
-export function getWorkspaceSyncStatePath(workspaceName, options = {}) {
-  return join(getWorkspaceDir(workspaceName, options), 'sync-state.json');
-}
-
-export function readCurrentWorkspaceSelection(options = {}) {
-  const statePath = getCurrentWorkspacePath(options);
-  if (!existsSync(statePath)) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(readFileSync(statePath, 'utf-8'));
-    return typeof parsed.workspace === 'string' && parsed.workspace.trim()
-      ? sanitizeWorkspaceName(parsed.workspace)
-      : null;
-  } catch {
-    return null;
-  }
-}
-
-export function writeCurrentWorkspaceSelection(workspaceName, options = {}) {
-  const stateDir = getGalStateDir(options);
-  mkdirSync(stateDir, { recursive: true });
-  const payload = {
-    workspace: sanitizeWorkspaceName(workspaceName),
-  };
-  writeFileSync(
-    getCurrentWorkspacePath(options),
-    `${JSON.stringify(payload, null, 2)}\n`,
-    'utf-8'
-  );
-}
-
-export function resolveActiveWorkspace({
-  explicitWorkspace,
-  projectWorkspaceRef,
-  gitOwner,
-  currentWorkspace,
-  fallbackWorkspace = 'personal',
-} = {}) {
-  const selected = firstDefinedValue([
-    explicitWorkspace,
-    projectWorkspaceRef,
-    gitOwner,
-    currentWorkspace,
-    fallbackWorkspace,
-  ]);
-
-  return sanitizeWorkspaceName(selected || 'personal');
+export function getWorkspaceSyncStatePath(options = {}) {
+  return join(getGalRoot(options), 'sync-state.json');
 }
 
 export function getProjectGalDir(projectRoot) {

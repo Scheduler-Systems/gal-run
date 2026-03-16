@@ -41,7 +41,7 @@ if command -v gal &> /dev/null; then
     echo ""
     echo "Next steps:"
     echo "  gal scan              # Discover local AI agent configs"
-    echo "  gal approve --local   # Standardize into .gal/config.yaml"
+    echo "  gal approve --local   # Standardize into ~/.gal/config.yaml"
     echo "  gal sync              # Distribute to your coding agents"
     echo ""
     echo "Optional org sync:"

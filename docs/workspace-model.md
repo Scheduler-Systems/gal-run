@@ -1,6 +1,6 @@
-# GAL Workspace Model
+# GAL Local Model
 
-This document defines the target local-first model for the GAL CLI and how that model will be published into the public `gal-run` repository.
+This document describes the current local-first GAL CLI model and the public extraction work around it.
 
 ## Current Public Repo Status
 
@@ -10,21 +10,22 @@ Today this repository is the public home for:
 - installation instructions
 - Homebrew formula
 - issues and community discussion
+- reference helpers, schemas, and tests for the local config model
 
-The CLI source is still being extracted in stages. This document describes the target architecture that public CLI work should implement.
+The CLI source is still being extracted in stages. Public docs should describe the shipped local model, not a future multi-workspace design.
 
-## Scope Model
+## Current Scope Model
 
-GAL should behave as a workspace-scoped configuration layer with repo-scoped overrides.
+GAL currently behaves as a workspace-scoped local config layer with optional repo-scoped overrides.
 
-The intended precedence is:
+The effective precedence is:
 
-`project scope > GAL workspace scope > generated native files`
+`project scope > workspace scope > generated native files`
 
 In practice:
 
-- `~/.gal/workspaces/<workspace>/` stores the local mirror of a GAL workspace
-- `<repo>/.gal/` stores repo-specific overrides
+- `~/.gal/config.yaml` stores the local workspace default
+- `<repo>/.gal/config.yaml` stores repo-specific overrides
 - native files like `AGENTS.md`, `.claude/`, `.cursor/`, and `.github/copilot-instructions.md` are generated outputs
 
 ## Directory Layout
@@ -33,23 +34,9 @@ Workspace scope:
 
 ```text
 ~/.gal/
-  state/
-    config.json
-    current-workspace.json
-    credentials.json
-    update-cache.json
-    telemetry-queue.json
-
-  workspaces/
-    personal/
-      config.yaml
-      platforms/
-      sync-state.json
-
-    scheduler-systems/
-      config.yaml
-      platforms/
-      sync-state.json
+  config.yaml
+  sync-state.json
+  config.json
 ```
 
 Project scope:
@@ -64,25 +51,24 @@ Project scope:
 
 Effective config for a repo should be resolved like this:
 
-1. Load the active workspace config from `~/.gal/workspaces/<workspace>/config.yaml`
+1. Load the workspace config from `~/.gal/config.yaml`
 2. Load repo overrides from `<repo>/.gal/config.yaml` when present
-3. Merge both, with repo scope taking precedence
+3. Use repo scope when the same setting exists in both places
 4. Generate native agent files from the effective config
 
 Important rules:
 
 - repo overrides never silently mutate workspace config
-- workspace sync from GAL Cloud updates `~/.gal/workspaces/<workspace>/`
-- promotion from local state into GAL Cloud or org workflows must be explicit
+- local approval writes the base config to `~/.gal/config.yaml`
+- cloud/org sync can still materialize local config, but repo overrides remain local
 
 ## Command Model
 
 For local-only users:
 
 ```bash
-gal workspace init personal
 gal scan
-gal approve
+gal approve --local
 gal sync
 ```
 
@@ -90,31 +76,29 @@ For connected users:
 
 ```bash
 gal auth login
-gal workspace connect Scheduler-Systems
-gal workspace pull
-gal sync
+gal sync --pull
 ```
 
 For repo-specific overrides:
 
 ```bash
-gal approve --project
 gal sync
 ```
 
+If `<repo>/.gal/config.yaml` exists, it overrides `~/.gal/config.yaml` for that repo.
+
 ## Public Repo Rollout
 
-The public repo rollout should happen in stages:
+The public repo rollout should continue in stages:
 
-1. Publish the scope model and CLI behavior in public docs
-2. Publish shared schemas, config formats, and generated-file mappings
-3. Publish the local config resolver and sync logic that do not require private backend code
-4. Publish the CLI source for local-first flows into this repository
-5. Keep proprietary GAL Cloud and org approval backend logic private
+1. Keep docs, helpers, and tests aligned with the shipped local model
+2. Publish more of the local resolver and sync logic that do not require private backend code
+3. Publish the CLI source for local-first flows into this repository
+4. Keep proprietary GAL Cloud and org approval backend logic private
 
 This keeps the public repo truthful while still allowing incremental extraction of the CLI.
 
-The first public schema drafts live here:
+The current public reference layer includes:
 
 - [schemas/workspace-config.schema.json](../schemas/workspace-config.schema.json)
 - [schemas/project-config.schema.json](../schemas/project-config.schema.json)
@@ -125,10 +109,9 @@ The first public schema drafts live here:
 - [reference/filesystem-helpers.mjs](../reference/filesystem-helpers.mjs)
 - [reference/config-documents.mjs](../reference/config-documents.mjs)
 
-The current public helper layer now also includes:
+The reference helper layer currently covers:
 
-- workspace and project path helpers for `~/.gal/workspaces/<workspace>/` and `<repo>/.gal/`
-- current-workspace state helpers for `~/.gal/state/current-workspace.json`
+- workspace and project path helpers for `~/.gal/` and `<repo>/.gal/`
 - project-root discovery that falls back to `.claude/` and `.gal/` when `.git` is absent
 - raw workspace and project document I/O for YAML config files and JSON sync-state sidecars
 

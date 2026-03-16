@@ -2,7 +2,7 @@
 
 This document defines the reference merge behavior for combining:
 
-- workspace scope from `~/.gal/workspaces/<workspace>/config.yaml`
+- workspace scope from `~/.gal/config.yaml`
 - project scope from `<repo>/.gal/config.yaml`
 
 The effective config is what GAL should use to generate native agent files.

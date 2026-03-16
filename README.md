@@ -225,6 +225,7 @@ See [docs/workspace-model.md](docs/workspace-model.md) for the target scope mode
 
 ## Supported Agents
 
+<!-- SUPPORTED_AGENTS_START -->
 This table is for local CLI support. MCP client compatibility is broader and is documented separately in the MCP section above.
 
 | Agent | Config Files | Local Scan | Local Sync | Memory |
@@ -237,6 +238,7 @@ This table is for local CLI support. MCP client compatibility is broader and is 
 | Windsurf | `.windsurfrules`, `.codeium/windsurf/memories/` | ✓ | ✓ | Native |
 | Antigravity | `.gemini/antigravity/` | ✓ | ✓ | Native |
 | Amp | `AGENTS.md` | ✓ | ✓ | Via GAL |
+<!-- SUPPORTED_AGENTS_END -->
 
 ## Documentation
 

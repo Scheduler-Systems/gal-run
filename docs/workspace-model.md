@@ -114,6 +114,13 @@ The public repo rollout should happen in stages:
 
 This keeps the public repo truthful while still allowing incremental extraction of the CLI.
 
+The first public schema drafts live here:
+
+- [schemas/workspace-config.schema.json](../schemas/workspace-config.schema.json)
+- [schemas/project-config.schema.json](../schemas/project-config.schema.json)
+- [examples/workspace-config.yaml](../examples/workspace-config.yaml)
+- [examples/project-config.yaml](../examples/project-config.yaml)
+
 ## PR Policy For Public Work
 
 Changes pushed to this public repository should follow these rules:

@@ -1,11 +1,11 @@
 cask "gal" do
   arch arm: "arm64", intel: "x64"
 
-  version "0.0.315"
-  sha256 arm:    "8fe3d2994e307610ed3f7a4ce2b17442b988bcfa27fe4a836be12999040896d4",
-         x86_64: "7838317dd01b0390e3301f4377cc49e054c1cd483ab55bee7c6ab0f1f8c69c84"
+  version "0.0.327"
+  sha256 arm:    "42e16267ab659d0f4001ca7a77b7427e08cde43c8f0b1802de1de368c59be116",
+         x86_64: "6d6237e6b73bbeb3cc5dfbd1e890ddc5a3d8ae364d08ae4eadf9dcaacbb08c44"
 
-  url "https://github.com/Scheduler-Systems/gal-run/releases/download/v#{version}/gal-#{version}-darwin-#{arch}.tar.gz"
+  url "https://github.com/Scheduler-Systems/gal-run/releases/download/v0.0.327/gal-#{version}-darwin-#{arch}.tar.gz"
   name "GAL"
   desc "CLI for GAL — AI agent configuration governance"
   homepage "https://gal.run"

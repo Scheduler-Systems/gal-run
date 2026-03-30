@@ -4,11 +4,34 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ format('{0}-{1}-pr-{2}', github.repository, github.workflow, github.event.pull_request.number) }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   gate:
+    needs: [runner-policy]
+    if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Enforce runner-policy result
+        env:
+          RUNNER_POLICY_RESULT: ${{ needs.runner-policy.result }}
+        run: |
+          case "$RUNNER_POLICY_RESULT" in
+            success|skipped)
+              echo "Runner policy passed"
+              ;;
+            *)
+              echo "runner-policy failed with result: $RUNNER_POLICY_RESULT"
+              exit 1
+              ;;
+          esac
+
+      - uses: actions/checkout@v6
 
       - name: Public surface check
         shell: bash
@@ -25,3 +48,10 @@ jobs:
           fi
 
           echo "Public surface clean."
+
+  runner-policy:
+    if: ${{ !cancelled() }}
+    uses: Scheduler-Systems/infra/.github/workflows/runner-policy-check.yml@main
+    permissions:
+      contents: read
+    secrets: inherit

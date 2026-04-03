@@ -1,0 +1,211 @@
+name: Deploy Governance Model (Cloud Run GPU)
+
+run-name: "Deploy governance model → Cloud Run GPU europe-west3"
+
+# Deploys the GAL governance model (Phi-4 14B + LoRA adapter) to Cloud Run GPU.
+#
+# Replaces the RunPod serverless path (#4111, superseded by #5607).
+# Uses the Stratus runner router — currently github_primary mode routes to ubuntu-latest.
+#
+# Build strategy: small image, model downloaded from HuggingFace at cold start.
+# Shadow path is async so cold-start latency (10-20 min) is acceptable.
+# Quantization: bitsandbytes INT8 at runtime (~14GB VRAM, fits on L4 24GB).
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag (default: UTC timestamp)"
+        required: false
+        default: ""
+      skip_deploy:
+        description: "Build and push only, skip Cloud Run deploy"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-governance-cloudrun
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: gal-run
+  REGION: europe-west3
+  AR_REGION: us-central1
+  AR_REPO: gal
+  SERVICE_NAME: governance-model-prod
+  BASE_MODEL: microsoft/phi-4
+  MAX_MODEL_LEN: "4096"
+  GPU_MEMORY_UTILIZATION: "0.85"
+  ADAPTER_GCS_PATH: gs://gal-run-storage-eu/model-training/governance/serverless/governance-adapter-20260330-l40.tar
+
+jobs:
+  route:
+    uses: ./.github/workflows/runner-router.yml
+    permissions:
+      actions: read
+      contents: read
+    secrets: inherit
+    with:
+      workflow_key: deploy-governance-cloudrun.yml
+
+  build-and-deploy:
+    name: Build image and deploy to Cloud Run
+    runs-on: ${{ needs.route.outputs.target_runner }}
+    needs: route
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set image tag
+        id: tag
+        run: |
+          TAG="${{ inputs.image_tag }}"
+          if [[ -z "$TAG" ]]; then
+            TAG="$(date -u +%Y%m%d%H%M%S)"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "image=${{ env.AR_REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/governance-model-cloudrun:$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+
+      - name: Configure Docker for Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.AR_REGION }}-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Free disk space
+        # phi-4 14B adapter is ~88MB; vllm base image + deps are large.
+        # GitHub hosted runners have ~14GB free by default; freeing extra space is a precaution.
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          docker system prune -af || true
+          df -h /
+
+      - name: Download and extract LoRA adapter from GCS
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/governance-adapter-build/adapter
+          gcloud storage cp "${{ env.ADAPTER_GCS_PATH }}" /tmp/governance-adapter.tar
+          tar -xf /tmp/governance-adapter.tar -C /tmp/governance-adapter-build/
+          # Adapter tar contains adapter/ directory with adapter_config.json + adapter_model.safetensors
+          if [[ ! -f /tmp/governance-adapter-build/adapter/adapter_config.json ]]; then
+            echo "ERROR: adapter_config.json not found in extracted tar" >&2
+            ls -la /tmp/governance-adapter-build/
+            exit 1
+          fi
+          echo "Adapter contents:"
+          ls -lh /tmp/governance-adapter-build/adapter/
+
+      - name: Copy Dockerfile
+        run: |
+          cp infra-codex-serverless/docker/vllm-governance-cloudrun/Dockerfile /tmp/governance-adapter-build/Dockerfile
+
+      - name: Build and push image
+        run: |
+          set -euo pipefail
+          IMAGE="${{ steps.tag.outputs.image }}"
+          docker build \
+            --build-arg BASE_IMAGE=vllm/vllm-openai:latest \
+            --build-arg MODEL_ID="${{ env.BASE_MODEL }}" \
+            --build-arg MAX_MODEL_LEN="${{ env.MAX_MODEL_LEN }}" \
+            --build-arg GPU_MEMORY_UTILIZATION="${{ env.GPU_MEMORY_UTILIZATION }}" \
+            -t "$IMAGE" \
+            /tmp/governance-adapter-build/
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Deploy to Cloud Run GPU
+        if: inputs.skip_deploy != 'true'
+        id: deploy
+        run: |
+          set -euo pipefail
+          gcloud run deploy "${{ env.SERVICE_NAME }}" \
+            --image "$IMAGE" \
+            --region "${{ env.REGION }}" \
+            --project "${{ env.PROJECT_ID }}" \
+            --gpu 1 \
+            --gpu-type nvidia-l4 \
+            --cpu 8 \
+            --memory 32Gi \
+            --no-allow-unauthenticated \
+            --no-cpu-throttling \
+            --min-instances 0 \
+            --max-instances 1 \
+            --concurrency 4 \
+            --timeout 600 \
+            --set-env-vars "MODEL_ID=${{ env.BASE_MODEL }},MAX_MODEL_LEN=${{ env.MAX_MODEL_LEN }},GPU_MEMORY_UTILIZATION=${{ env.GPU_MEMORY_UTILIZATION }}" \
+            --format json | tee /tmp/deploy-output.json
+
+          SERVICE_URL=$(jq -r '.status.url' /tmp/deploy-output.json)
+          echo "service_url=$SERVICE_URL" >> "$GITHUB_OUTPUT"
+          echo "Deployed: $SERVICE_URL"
+
+      - name: Grant invoker role to gal-api-prod service account
+        if: inputs.skip_deploy != 'true'
+        run: |
+          gcloud run services add-iam-policy-binding "${{ env.SERVICE_NAME }}" \
+            --region "${{ env.REGION }}" \
+            --project "${{ env.PROJECT_ID }}" \
+            --member "serviceAccount:cloud-run-prod@${{ env.PROJECT_ID }}.iam.gserviceaccount.com" \
+            --role "roles/run.invoker"
+
+      - name: Update governance-model-endpoint secret
+        if: inputs.skip_deploy != 'true'
+        run: |
+          set -euo pipefail
+          SERVICE_URL="${{ steps.deploy.outputs.service_url }}"
+          ENDPOINT="${SERVICE_URL}/v1/chat/completions"
+          printf '%s' "$ENDPOINT" | gcloud secrets versions add governance-model-endpoint \
+            --project "${{ env.PROJECT_ID }}" \
+            --data-file=-
+          echo "Secret updated: governance-model-endpoint → $ENDPOINT"
+
+      - name: Smoke test
+        if: inputs.skip_deploy != 'true'
+        run: |
+          set -euo pipefail
+          SERVICE_URL="${{ steps.deploy.outputs.service_url }}"
+          TOKEN=$(gcloud auth print-identity-token --audiences="$SERVICE_URL")
+          HTTP_CODE=$(curl -s -o /tmp/smoke-response.json -w "%{http_code}" \
+            -X POST "${SERVICE_URL}/health" \
+            -H "Authorization: Bearer $TOKEN" \
+            --max-time 30)
+          echo "Health check HTTP $HTTP_CODE"
+          cat /tmp/smoke-response.json || true
+          if [[ "$HTTP_CODE" != "200" ]]; then
+            echo "::warning::Health check returned $HTTP_CODE — service may still be warming up"
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Governance Model Cloud Run Deployment"
+            echo ""
+            echo "- **Image**: \`$IMAGE\`"
+            echo "- **Service**: \`${{ env.SERVICE_NAME }}\` in \`${{ env.REGION }}\`"
+            echo "- **GPU**: NVIDIA L4 (europe-west3)"
+            echo "- **Model**: \`${{ env.BASE_MODEL }}\` + LoRA adapter (bitsandbytes INT8)"
+            echo "- **Adapter source**: \`${{ env.ADAPTER_GCS_PATH }}\`"
+            echo "- **Secret updated**: \`governance-model-endpoint\`"
+            echo "- **Closes**: #5607, supersedes #4111"
+          } >> "$GITHUB_STEP_SUMMARY"

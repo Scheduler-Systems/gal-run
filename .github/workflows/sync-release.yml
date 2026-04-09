@@ -188,7 +188,7 @@ jobs:
           print(f"Updated Casks/gal.rb to v{version}")
           PY
 
-      - name: Commit and open PR
+      - name: Commit and push to main
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -197,19 +197,29 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md CHANGELOG.md Formula/gal.rb Casks/gal.rb
           if ! git diff --staged --quiet; then
-            BRANCH="release/v${VERSION}"
-            git checkout -b "$BRANCH"
             git commit -m "[ci] Release v$VERSION"
             git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
-            git push origin "$BRANCH" --force
-            EXISTING_PR=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" --base main --state open --json url --jq '.[0].url')
-            if [ -n "$EXISTING_PR" ]; then
-              echo "Release PR already open: $EXISTING_PR"
+
+            # Try pushing directly to main (works if bot has branch protection bypass)
+            if git push origin main 2>/dev/null; then
+              echo "Pushed release v$VERSION directly to main"
             else
-              gh pr create --base main --head "$BRANCH" \
-                --title "Release v$VERSION" \
-                --body "Automated release version update. Manual review is required before merge." \
-                --repo "${{ github.repository }}"
+              # Fallback: create PR with auto-merge
+              BRANCH="release/v${VERSION}"
+              git checkout -b "$BRANCH"
+              git push origin "$BRANCH" --force
+              EXISTING_PR=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" --base main --state open --json url --jq '.[0].url')
+              if [ -n "$EXISTING_PR" ]; then
+                echo "Release PR already open: $EXISTING_PR"
+                gh pr merge "$EXISTING_PR" --squash --auto --delete-branch --repo "${{ github.repository }}" || true
+              else
+                PR_URL=$(gh pr create --base main --head "$BRANCH" \
+                  --title "Release v$VERSION" \
+                  --body "Automated release version update." \
+                  --repo "${{ github.repository }}")
+                echo "Created PR: $PR_URL"
+                gh pr merge "$PR_URL" --squash --auto --delete-branch --repo "${{ github.repository }}" || true
+              fi
             fi
           else
             echo "No changes to commit - version already up to date"

@@ -1,8 +1,8 @@
 # Changelog
 
-## [0.0.597] - 2026-04-17
+## [0.0.624] - 2026-04-22
 
-- See [npm package](https://www.npmjs.com/package/@scheduler-systems/gal-run/v/0.0.597) for details
+- See [npm package](https://www.npmjs.com/package/@scheduler-systems/gal-run/v/0.0.624) for details
 
 ## [0.0.594] - 2026-04-15
 

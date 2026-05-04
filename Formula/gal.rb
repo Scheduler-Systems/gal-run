@@ -1,7 +1,7 @@
 class Gal < Formula
   desc "Governance Agentic Layer CLI"
   homepage "https://gal.run"
-  version "0.0.667"
+  version "0.0.674"
 
   livecheck do
     url :stable
@@ -10,20 +10,20 @@ class Gal < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/Scheduler-Systems/gal-run/releases/download/v0.0.667/gal-#{version}-darwin-arm64.tar.gz"
-      sha256 "83f1c5363aab0494d857ae3bca6a5d738d95ccf2aa2b2034e992b4e1cd5d22e4"
+      url "https://github.com/Scheduler-Systems/gal-run/releases/download/v0.0.674/gal-#{version}-darwin-arm64.tar.gz"
+      sha256 "3d68f5cebd8c6d7f5921b86f14d44f1a4a304c1a4bb6ec43efa7dd19ac2e216a"
     end
 
     on_intel do
-      url "https://github.com/Scheduler-Systems/gal-run/releases/download/v0.0.667/gal-#{version}-darwin-x64.tar.gz"
-      sha256 "f7734a0e88c6355b6741fbb604c79bc12b6585a734c4c3018a062aa4bc947657"
+      url "https://github.com/Scheduler-Systems/gal-run/releases/download/v0.0.674/gal-#{version}-darwin-x64.tar.gz"
+      sha256 "494f8d7aff3fdc208a209f1de6692b3849065e849c75ab5a5a794a4800041867"
     end
   end
 
   on_linux do
     on_intel do
-      url "https://github.com/Scheduler-Systems/gal-run/releases/download/v0.0.667/gal-#{version}-linux-x64.tar.gz"
-      sha256 "c7ac9ecd059c7b97a11a041509ccbee29bbddf769d865fc091e2b9e66a311137"
+      url "https://github.com/Scheduler-Systems/gal-run/releases/download/v0.0.674/gal-#{version}-linux-x64.tar.gz"
+      sha256 "047416203695125a4b4472989ff7ddf24bb7e4eed7d0849d5edc5efdd2218c0f"
     end
   end
 
